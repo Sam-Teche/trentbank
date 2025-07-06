@@ -1,6 +1,6 @@
 const express = require("express");
 const { validationResult } = require("express-validator");
-const User = require("../models/User");
+const User = require("../models/user");
 const ResetToken = require("../models/ResetToken");
 const { authenticateToken } = require("../middleware/auth");
 const {
