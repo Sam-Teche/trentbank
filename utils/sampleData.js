@@ -1,4 +1,4 @@
-const User = require("../models/User");
+const User = require("../models/User.js");
 
 // Initialize sample data
 const initializeSampleData = async () => {
