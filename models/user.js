@@ -158,7 +158,7 @@ userSchema.statics.generateAccountNumber = async function () {
 
   return accountNumber;
 };
-
+ll
 const User = mongoose.model("User", userSchema);
 
 module.exports = User;
