@@ -1,5 +1,8 @@
 const User = require("../models/User");
 
+const fs = require("fs");
+const path = require("path");
+
 // Initialize sample data
 const initializeSampleData = async () => {
   try {
@@ -40,6 +43,29 @@ const initializeSampleData = async () => {
     console.error("Error initializing sample data:", error);
   }
 };
+
+
+
+
+// Debug: Check what files exist
+console.log('=== DEBUGGING FILE PATHS ===');
+console.log('Current directory:', __dirname);
+console.log('Looking for models at:', path.resolve(__dirname, '../models'));
+
+try {
+  const modelsDir = path.resolve(__dirname, '../models');
+  if (fs.existsSync(modelsDir)) {
+    console.log('Models directory exists!');
+    console.log('Files in models:', fs.readdirSync(modelsDir));
+  } else {
+    console.log('Models directory does NOT exist');
+  }
+} catch (error) {
+  console.log('Error checking models directory:', error.message);
+}
+
+
+
 
 module.exports = {
   initializeSampleData,
