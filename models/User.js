@@ -291,53 +291,6 @@ userSchema.methods.resetLoginAttempts = async function () {
 };
 
 
-// Admin unlock endpoint
-router.post("/admin/unlock-account", async (req, res) => {
-  try {
-    const { identifier } = req.body; // username or email
-    
-    const user = await User.findOne({
-      $or: [{ username: identifier }, { email: identifier }]
-    });
-    
-    if (!user) {
-      return res.status(404).json({ message: "User not found" });
-    }
-    
-    await user.resetLoginAttempts();
-    
-    res.json({ message: "Account unlocked successfully" });
-  } catch (error) {
-    console.error("Unlock error:", error);
-    res.status(500).json({ message: "Internal server error" });
-  }
-});
-
-router.get("/check-lock-status/:identifier", async (req, res) => {
-  try {
-    const user = await User.findOne({
-      $or: [
-        { username: req.params.identifier },
-        { email: req.params.identifier },
-      ],
-    });
-
-    if (!user) {
-      return res.status(404).json({ message: "User not found" });
-    }
-
-    res.json({
-      isLocked: user.isLocked,
-      loginAttempts: user.loginAttempts,
-      lockUntil: user.lockUntil,
-      remainingTime: user.lockUntil
-        ? Math.max(0, user.lockUntil - Date.now())
-        : 0,
-    });
-  } catch (error) {
-    res.status(500).json({ message: "Internal server error" });
-  }
-});
 
 
 // Method to generate account number
