@@ -3,7 +3,7 @@ const bcrypt = require("bcryptjs");
 
 const BCRYPT_ROUNDS = parseInt(process.env.BCRYPT_ROUNDS) || 12;
 
-// User Schema - Extended with all form fields
+// User Schema - Focused ONLY on identity & profile
 const userSchema = new mongoose.Schema(
   {
     // Basic Authentication Fields
@@ -84,29 +84,10 @@ const userSchema = new mongoose.Schema(
 
     // Address Information
     address: {
-      street1: {
-        type: String,
-        required: true,
-        trim: true,
-        maxlength: 100,
-      },
-      street2: {
-        type: String,
-        trim: true,
-        maxlength: 100,
-      },
-      city: {
-        type: String,
-        required: true,
-        trim: true,
-        maxlength: 50,
-      },
-      state: {
-        type: String,
-        required: true,
-        trim: true,
-        maxlength: 2,
-      },
+      street1: { type: String, required: true, trim: true },
+      street2: { type: String, trim: true },
+      city: { type: String, required: true, trim: true },
+      state: { type: String, required: true, trim: true, maxlength: 2 },
       zipCode: {
         type: String,
         required: true,
@@ -115,7 +96,7 @@ const userSchema = new mongoose.Schema(
       },
     },
 
-    // Employment/Financial Information
+    // Employment/Financial Info (Profile only—not tied to accounts)
     employment: {
       status: {
         type: String,
@@ -127,10 +108,7 @@ const userSchema = new mongoose.Schema(
         trim: true,
         maxlength: 100,
         required: function () {
-          return (
-            this.employment.status === "employed" ||
-            this.employment.status === "self-employed"
-          );
+          return ["employed", "self-employed"].includes(this.employment.status);
         },
       },
       occupation: {
@@ -138,10 +116,7 @@ const userSchema = new mongoose.Schema(
         trim: true,
         maxlength: 100,
         required: function () {
-          return (
-            this.employment.status === "employed" ||
-            this.employment.status === "self-employed"
-          );
+          return ["employed", "self-employed"].includes(this.employment.status);
         },
       },
       annualIncome: {
@@ -163,64 +138,26 @@ const userSchema = new mongoose.Schema(
       },
     },
 
-    // Account Information
-    accountNumber: {
-      type: String,
-      required: true,
-      unique: true,
-      length: 10,
-    },
-    accountType: {
-      type: String,
-      enum: ["checking", "savings", "premium"],
-      required: true,
-    },
-    balance: {
-      type: Number,
-      default: 1000, // Welcome bonus
-      min: 0,
-    },
-
-    // Account Status
-    isActive: {
-      type: Boolean,
-      default: true,
-    },
-    isEmailVerified: {
-      type: Boolean,
-      default: false,
-    },
-    lastLogin: {
-      type: Date,
-    },
-    passwordChangedAt: {
-      type: Date,
-    },
-    loginAttempts: {
-      type: Number,
-      default: 0,
-    },
-    lockUntil: {
-      type: Date,
-    },
+    // User Account Status
+    isActive: { type: Boolean, default: true },
+    isEmailVerified: { type: Boolean, default: false },
+    lastLogin: { type: Date },
+    passwordChangedAt: { type: Date },
+    loginAttempts: { type: Number, default: 0 },
+    lockUntil: { type: Date },
   },
-  {
-    timestamps: true,
-  }
+  { timestamps: true }
 );
 
-// Indexes for better performance
+// Indexes
 userSchema.index({ email: 1 });
 userSchema.index({ username: 1 });
-userSchema.index({ accountNumber: 1 });
 userSchema.index({ ssn: 1 });
 
-// Virtual for full name
+// Virtuals
 userSchema.virtual("fullName").get(function () {
   return `${this.firstName} ${this.lastName}`;
 });
-
-// Virtual for age
 userSchema.virtual("age").get(function () {
   const today = new Date();
   const birthDate = new Date(this.dateOfBirth);
@@ -234,38 +171,29 @@ userSchema.virtual("age").get(function () {
   }
   return age;
 });
-
-// Virtual for full address
 userSchema.virtual("fullAddress").get(function () {
   let address = this.address.street1;
   if (this.address.street2) address += `, ${this.address.street2}`;
   address += `, ${this.address.city}, ${this.address.state} ${this.address.zipCode}`;
   return address;
 });
-
-// Check if account is locked
 userSchema.virtual("isLocked").get(function () {
   return !!(this.lockUntil && this.lockUntil > Date.now());
 });
 
-// Pre-save middleware to hash password
+// Password hashing
 userSchema.pre("save", async function (next) {
   if (!this.isModified("password")) return next();
-
-  try {
-    this.password = await bcrypt.hash(this.password, BCRYPT_ROUNDS);
-    next();
-  } catch (error) {
-    next(error);
-  }
+  this.password = await bcrypt.hash(this.password, BCRYPT_ROUNDS);
+  next();
 });
 
-// Method to compare password
+// Compare password
 userSchema.methods.comparePassword = async function (candidatePassword) {
   return await bcrypt.compare(candidatePassword, this.password);
 };
 
-// Method to handle login attempts
+// Login attempts
 userSchema.methods.incLoginAttempts = async function () {
   if (this.lockUntil && this.lockUntil < Date.now()) {
     return this.updateOne({
@@ -273,41 +201,15 @@ userSchema.methods.incLoginAttempts = async function () {
       $set: { loginAttempts: 1 },
     });
   }
-
   const updates = { $inc: { loginAttempts: 1 } };
-
   if (this.loginAttempts + 1 >= 5 && !this.isLocked) {
     updates.$set = { lockUntil: Date.now() + 2 * 60 * 60 * 1000 }; // 2 hours
   }
-
   return this.updateOne(updates);
 };
-
-// Method to reset login attempts
 userSchema.methods.resetLoginAttempts = async function () {
-  return this.updateOne({
-    $unset: { loginAttempts: 1, lockUntil: 1 },
-  });
-};
-
-
-
-
-// Method to generate account number
-userSchema.statics.generateAccountNumber = async function () {
-  let accountNumber;
-  let exists = true;
-
-  while (exists) {
-    accountNumber = Math.floor(
-      1000000000 + Math.random() * 9000000000
-    ).toString();
-    exists = await this.findOne({ accountNumber });
-  }
-
-  return accountNumber;
+  return this.updateOne({ $unset: { loginAttempts: 1, lockUntil: 1 } });
 };
 
 const User = mongoose.model("User", userSchema);
-
 module.exports = User;

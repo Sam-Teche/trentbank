@@ -120,6 +120,7 @@ router.post("/signup", signupValidation, async (req, res) => {
     });
 
     await user.save();
+    const accounts = await Account.createDefaultAccounts(user._id);
 
     // Generate token
     const token = generateToken(user._id);
@@ -135,13 +136,22 @@ router.post("/signup", signupValidation, async (req, res) => {
         firstName: user.firstName,
         lastName: user.lastName,
         fullName: user.fullName,
-        accountNumber: user.accountNumber,
-        accountType: user.accountType,
-        balance: user.balance,
+        createdAt: user.createdAt,
+      },
+
+
+      accounts: accounts.map(acc => ({
+        id: acc._id,
+        type: acc.type,
+        accountNumber: acc.accountNumber,
+        balance: acc.balance,
         age: user.age,
         fullAddress: user.fullAddress,
         createdAt: user.createdAt,
-      },
+      
+    }))
+
+
     });
   } catch (error) {
     console.error("Signup error:", error);
@@ -196,36 +206,35 @@ router.post("/signup/simple", simpleSignupValidation, async (req, res) => {
     }
 
     // Generate account number
-    const accountNumber = await User.generateAccountNumber();
-
-    // Create new user with minimal data
+    // Create new user (no account fields)
     const user = new User({
-      username,
-      email,
-      password,
       firstName,
       lastName,
-      accountNumber,
-      accountType: "checking",
-      balance: 1000,
-      // These would need to be filled later
-      dateOfBirth: new Date("1990-01-01"),
-      phone: "000-000-0000",
-      ssn: "000-00-0000",
+      email,
+      username,
+      password,
+      dateOfBirth: new Date(dateOfBirth),
+      phone,
+      ssn,
       address: {
-        street1: "Not provided",
-        city: "Not provided",
-        state: "CA",
-        zipCode: "00000",
+        street1: address1,
+        street2: address2 || "",
+        city,
+        state: state.toUpperCase(),
+        zipCode: zip,
       },
       employment: {
-        status: "employed",
-        annualIncome: "under-25k",
-        sourceOfFunds: "employment",
+        status: employmentStatus,
+        employer: employer || "",
+        occupation: occupation || "",
+        annualIncome,
+        sourceOfFunds,
       },
     });
-
     await user.save();
+
+    // Create default accounts
+    
 
     // Generate token
     const token = generateToken(user._id);
@@ -279,7 +288,8 @@ router.post("/login", loginValidation, async (req, res) => {
     // Check if account is locked
     if (user.isLocked) {
       return res.status(423).json({
-        message: "Account temporarily locked due to too many failed login attempts",
+        message:
+          "Account temporarily locked due to too many failed login attempts",
       });
     }
 
@@ -302,6 +312,9 @@ router.post("/login", loginValidation, async (req, res) => {
 
     // Update last login
     await user.updateOne({ lastLogin: new Date() });
+    // Get user's active accounts
+    
+    const accounts = await Account.find({ userId: user._id, isActive: true });
 
     // Generate token
     const token = generateToken(user._id);
@@ -323,7 +336,20 @@ router.post("/login", loginValidation, async (req, res) => {
         age: user.age,
         fullAddress: user.fullAddress,
         lastLogin: user.lastLogin,
+        createdAt: user.createdAt,
       },
+      accounts: accounts.map((acc) => ({
+        id: acc._id,
+        type: acc.type,
+        accountNumber: acc.formattedAccountNumber,
+        balance: acc.formattedBalance,
+        isPrimary: acc.isPrimary,
+        ...(acc.type === "credit_card" && {
+          creditLimit: acc.formattedAvailableCredit,
+          availableCredit: acc.formattedAvailableCredit,
+          utilization: acc.creditUtilization,
+        }),
+      })),
     });
   } catch (error) {
     console.error("Login error:", error);
