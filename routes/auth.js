@@ -1,6 +1,7 @@
 const express = require("express");
 const { validationResult } = require("express-validator");
 const User = require("../models/User");
+const Account = require("../models/Account");
 const ResetToken = require("../models/ResetToken");
 const { authenticateToken } = require("../middleware/auth");
 const {
@@ -98,7 +99,7 @@ router.post("/signup", signupValidation, async (req, res) => {
     });
 
     await user.save();
-
+    
     // Create default accounts (balance comes from here)
     const accounts = await Account.createDefaultAccounts(user._id);
 
