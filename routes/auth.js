@@ -17,6 +17,7 @@ const { sendPasswordResetEmail } = require("../services/emailService");
 const router = express.Router();
 
 // Enhanced signup endpoint for complete form
+// Enhanced signup endpoint for complete form
 router.post("/signup", signupValidation, async (req, res) => {
   try {
     const errors = validationResult(req);
@@ -28,36 +29,25 @@ router.post("/signup", signupValidation, async (req, res) => {
     }
 
     const {
-      // Account Type
       accountType,
-      
-      // Personal Information
       firstName,
       lastName,
       email,
       dateOfBirth,
       phone,
       ssn,
-      
-      // Address Information
       address1,
       address2,
       city,
       state,
       zip,
-      
-      // Employment/Financial Information
       employmentStatus,
       employer,
       occupation,
       annualIncome,
       sourceOfFunds,
-      
-      // Account Setup
       username,
       password,
-      
-      // Terms (already validated)
       termsAgreement,
       electronicConsent,
     } = req.body;
@@ -79,20 +69,15 @@ router.post("/signup", signupValidation, async (req, res) => {
     // Generate account number
     const accountNumber = await User.generateAccountNumber();
 
-    // Create new user with all form data
+    // Create new user WITHOUT balance field
     const user = new User({
-      // Account Type
       accountType,
-      
-      // Personal Information
       firstName,
       lastName,
       email,
       dateOfBirth: new Date(dateOfBirth),
       phone,
       ssn,
-      
-      // Address Information
       address: {
         street1: address1,
         street2: address2 || "",
@@ -100,8 +85,6 @@ router.post("/signup", signupValidation, async (req, res) => {
         state: state.toUpperCase(),
         zipCode: zip,
       },
-      
-      // Employment/Financial Information
       employment: {
         status: employmentStatus,
         employer: employer || "",
@@ -109,23 +92,20 @@ router.post("/signup", signupValidation, async (req, res) => {
         annualIncome,
         sourceOfFunds,
       },
-      
-      // Account Setup
       username,
       password,
       accountNumber,
-      
-      // Initial balance based on account type
-      balance: accountType === "premium" ? 5000 : 1000,
     });
 
     await user.save();
+
+    // Create default accounts (balance comes from here)
     const accounts = await Account.createDefaultAccounts(user._id);
 
     // Generate token
     const token = generateToken(user._id);
 
-    // Return success response
+    // Return success response WITHOUT user.balance
     res.status(201).json({
       message: "Account created successfully",
       token,
@@ -137,38 +117,27 @@ router.post("/signup", signupValidation, async (req, res) => {
         lastName: user.lastName,
         fullName: user.fullName,
         createdAt: user.createdAt,
+        age: user.age,
+        fullAddress: user.fullAddress,
       },
-
-
       accounts: accounts.map(acc => ({
         id: acc._id,
         type: acc.type,
         accountNumber: acc.accountNumber,
         balance: acc.balance,
-        age: user.age,
-        fullAddress: user.fullAddress,
-        createdAt: user.createdAt,
-      
-    }))
-
-
+        isPrimary: acc.isPrimary,
+        createdAt: acc.createdAt,
+      })),
     });
   } catch (error) {
     console.error("Signup error:", error);
-    
-    // Handle validation errors
     if (error.name === 'ValidationError') {
       const errors = Object.values(error.errors).map(err => ({
         field: err.path,
         message: err.message,
       }));
-      return res.status(400).json({
-        message: "Validation failed",
-        errors,
-      });
+      return res.status(400).json({ message: "Validation failed", errors });
     }
-    
-    // Handle duplicate key errors
     if (error.code === 11000) {
       const field = Object.keys(error.keyValue)[0];
       const value = error.keyValue[field];
@@ -176,7 +145,6 @@ router.post("/signup", signupValidation, async (req, res) => {
         message: `${field} '${value}' already exists`,
       });
     }
-    
     res.status(500).json({ message: "Internal server error" });
   }
 });
@@ -332,7 +300,6 @@ router.post("/login", loginValidation, async (req, res) => {
         fullName: user.fullName,
         accountNumber: user.accountNumber,
         accountType: user.accountType,
-        balance: user.balance,
         age: user.age,
         fullAddress: user.fullAddress,
         lastLogin: user.lastLogin,
@@ -370,7 +337,6 @@ router.get("/verify", authenticateToken, (req, res) => {
       fullName: req.user.fullName,
       accountNumber: req.user.accountNumber,
       accountType: req.user.accountType,
-      balance: req.user.balance,
       age: req.user.age,
       fullAddress: req.user.fullAddress,
       phone: req.user.phone,
