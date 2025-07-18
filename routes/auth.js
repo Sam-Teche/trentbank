@@ -68,7 +68,7 @@ router.post("/signup", signupValidation, async (req, res) => {
     }
 
     // Generate account number
-    const accountNumber = await User.generateAccountNumber();
+    const accountNumber = await Account.generateAccountNumber();
 
     // Create new user WITHOUT balance field
     const user = new User({
