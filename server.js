@@ -19,6 +19,8 @@ app.use(
       process.env.FRONTEND_URL || "http://localhost:5500",
       "http://127.0.0.1:5500",
       "http://localhost:5500",
+      "https://trentbank.netlify.app",
+      "https://trentbank.netlify.app/",
     ],
     credentials: true,
   })
@@ -35,8 +37,8 @@ const MONGODB_URI =
 
 mongoose
   .connect(MONGODB_URI, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
+    //useNewUrlParser: true,
+    //useUnifiedTopology: true,
     serverSelectionTimeoutMS: 30000, // Add timeout settings
     socketTimeoutMS: 45000,
   })
