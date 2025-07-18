@@ -301,8 +301,7 @@ router.post("/login", loginValidation, async (req, res) => {
     }
 
     // Update last login
-    user.lastLogin = new Date();
-    await user.save();
+    await user.updateOne({ lastLogin: new Date() });
 
     // Generate token
     const token = generateToken(user._id);

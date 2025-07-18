@@ -26,7 +26,7 @@ app.use(
   })
 );
 app.use(express.json({ limit: "10mb" }));
-
+app.set("trust proxy", 1);
 // Rate limiting
 app.use(limiter);
 app.use("/api/auth", authLimiter);
