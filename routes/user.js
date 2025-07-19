@@ -2,6 +2,7 @@ const express = require("express");
 const { validationResult } = require("express-validator");
 const User = require("../models/User");
 const Account = require("../models/Account")
+const Transaction = require("../models/Transaction");
 const { authenticateToken } = require("../middleware/auth");
 const { profileUpdateValidation } = require("../middleware/validation");
 
