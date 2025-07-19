@@ -1,20 +1,43 @@
 const rateLimit = require("express-rate-limit");
 
-// General rate limiting
-const limiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100, // limit each IP to 100 requests per windowMs
-  message: "Too many requests from this IP, please try again later.",
-});
+const createRateLimiter = (windowMs, max, messageText) => {
+  return rateLimit({
+    windowMs,
+    max,
+    standardHeaders: true,
+    legacyHeaders: false,
+    handler: (req, res) => {
+      res.status(429).json({
+        error: "Rate limit exceeded",
+        message: messageText,
+        retryAfter: Math.ceil(windowMs / 1000),
+        limit: max,
+        windowMs: windowMs,
+      });
+    },
+  });
+};
 
-// Authentication rate limiting
-const authLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 5, // limit each IP to 5 auth requests per windowMs
-  message: "Too many authentication attempts, please try again later.",
-});
+const limiter = createRateLimiter(
+  15 * 60 * 1000,
+  100,
+  "Too many requests from this IP, please try again later."
+);
+
+const authLimiter = createRateLimiter(
+  15 * 60 * 1000,
+  5,
+  "Too many authentication attempts, please try again later."
+);
+
+const loginLimiter = createRateLimiter(
+  1 * 60 * 1000,
+  3,
+  "Too many login attempts. Please wait 1 minute before trying again."
+);
 
 module.exports = {
   limiter,
   authLimiter,
+  loginLimiter,
 };
