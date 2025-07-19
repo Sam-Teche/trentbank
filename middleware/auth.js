@@ -14,33 +14,40 @@ const verifyToken = (token) => {
 };
 
 // Middleware to authenticate JWT token
-const authenticateToken = async (req, res, next) => {
+const authenticateToken = (req, res, next) => {
   const authHeader = req.headers["authorization"];
-  const token = authHeader && authHeader.split(" ")[1];
+  const token = authHeader && authHeader.split(" ")[1]; // Bearer TOKEN
 
   if (!token) {
-    return res.status(401).json({ message: "Access token required" });
-  }
-
-  const decoded = verifyToken(token);
-  if (!decoded) {
-    return res.status(403).json({ message: "Invalid or expired token" });
+    return res.status(401).json({
+      message: "Access denied. No token provided.",
+    });
   }
 
   try {
-    const user = await User.findById(decoded.userId).select("-password");
-    if (!user || !user.isActive) {
-      return res.status(403).json({ message: "User not found or inactive" });
-    }
-
-    req.user = user;
+    // Use ACCESS_TOKEN_SECRET, fallback to JWT_SECRET for backward compatibility
+    const secret = process.env.ACCESS_TOKEN_SECRET || process.env.JWT_SECRET;
+    const decoded = jwt.verify(token, secret);
+    req.user = decoded;
     next();
   } catch (error) {
     console.error("Token verification error:", error);
-    return res.status(403).json({ message: "Invalid token" });
+
+    if (error.name === "TokenExpiredError") {
+      return res.status(401).json({
+        message: "Token expired. Please refresh your session.",
+      });
+    } else if (error.name === "JsonWebTokenError") {
+      return res.status(403).json({
+        message: "Invalid token.",
+      });
+    } else {
+      return res.status(500).json({
+        message: "Token verification failed.",
+      });
+    }
   }
 };
-
 module.exports = {
   authenticateToken,
   verifyToken,

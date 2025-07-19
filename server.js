@@ -2,6 +2,7 @@ const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
 const helmet = require("helmet");
+const cookieParser = require("cookie-parser");
 const { limiter, authLimiter } = require("./middleware/rateLimiter");
 const { errorHandler, notFoundHandler } = require("./middleware/errorHandler");
 const { initializeSampleData } = require("./utils/sampleData");
@@ -16,9 +17,7 @@ app.use(helmet());
 app.use(
   cors({
     origin: [
-      process.env.FRONTEND_URL || "http://localhost:5500",
-      "http://127.0.0.1:5500",
-      "http://localhost:5500",
+      process.env.FRONTEND_URL || 
       "https://trentbank.netlify.app",
       "https://trentbank.netlify.app/",
     ],
@@ -26,6 +25,7 @@ app.use(
   })
 );
 app.use(express.json({ limit: "10mb" }));
+app.use(cookieParser());
 app.set("trust proxy", 1);
 // Rate limiting
 app.use(limiter);

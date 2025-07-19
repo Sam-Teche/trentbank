@@ -17,6 +17,231 @@ const { sendPasswordResetEmail } = require("../services/emailService");
 
 const router = express.Router();
 
+
+
+
+
+const jwt = require("jsonwebtoken");
+
+// Enhanced token generation with both access and refresh tokens
+function generateSecureTokens(user) {
+  const payload = {
+    id: user._id,
+    username: user.username,
+    email: user.email,
+  };
+
+  // Short-lived access token (1 hour)
+  const accessToken = jwt.sign(
+    payload,
+    process.env.ACCESS_TOKEN_SECRET || process.env.JWT_SECRET,
+    { expiresIn: "1h" }
+  );
+
+  // Long-lived refresh token (7 days)
+  const refreshToken = jwt.sign(
+    payload,
+    process.env.REFRESH_TOKEN_SECRET || process.env.JWT_SECRET + "_refresh",
+    { expiresIn: "7d" }
+  );
+
+  return { accessToken, refreshToken };
+}
+
+// ============ EXISTING ROUTES (KEEP ALL YOUR CURRENT LOGIC) ============
+
+// Login route - ENHANCED with secure token handling
+router.post("/login", loginValidation, async (req, res) => {
+  try {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({
+        message: "Validation failed",
+        errors: errors.array(),
+      });
+    }
+
+    const { username, password } = req.body;
+
+    // Find user by username or email
+    const user = await User.findOne({
+      $or: [{ username }, { email: username }],
+    });
+
+    if (!user || !(await user.comparePassword(password))) {
+      return res.status(401).json({ message: "Invalid credentials" });
+    }
+
+    // Check if user is active
+    if (!user.isActive) {
+      return res.status(401).json({ message: "Account is deactivated" });
+    }
+
+    // ✅ NEW: Generate both access and refresh tokens
+    const { accessToken, refreshToken } = generateSecureTokens(user);
+
+    // ✅ NEW: Set HTTP-only cookie for refresh token
+    res.cookie("refreshToken", refreshToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "strict",
+      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+      path: "/",
+    });
+
+    // Update last login
+    user.lastLogin = new Date();
+    await user.save();
+
+    // Return access token and user data (same format as before)
+    res.json({
+      message: "Login successful",
+      token: accessToken, // ← This is now the short-lived access token
+      user: {
+        id: user._id,
+        username: user.username,
+        email: user.email,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        fullName: user.fullName,
+        age: user.age,
+        fullAddress: user.fullAddress,
+        lastLogin: user.lastLogin,
+        createdAt: user.createdAt,
+      },
+    });
+  } catch (error) {
+    console.error("Login error:", error);
+    res.status(500).json({ message: "Server error during login" });
+  }
+});
+
+// ✅ NEW: Token refresh endpoint
+router.post("/refresh", async (req, res) => {
+  try {
+    const { refreshToken } = req.cookies;
+
+    if (!refreshToken) {
+      return res.status(401).json({ message: "No refresh token provided" });
+    }
+
+    // Verify refresh token
+    jwt.verify(
+      refreshToken,
+      process.env.REFRESH_TOKEN_SECRET || process.env.JWT_SECRET + "_refresh",
+      async (err, decoded) => {
+        if (err) {
+          // Clear invalid cookie
+          res.clearCookie("refreshToken");
+          return res.status(403).json({ message: "Invalid refresh token" });
+        }
+
+        // Get user from database
+        const user = await User.findById(decoded.id);
+        if (!user || !user.isActive) {
+          res.clearCookie("refreshToken");
+          return res
+            .status(404)
+            .json({ message: "User not found or inactive" });
+        }
+
+        // Generate new access token only
+        const { accessToken } = generateSecureTokens(user);
+
+        res.json({ token: accessToken });
+      }
+    );
+  } catch (error) {
+    console.error("Token refresh error:", error);
+    res.status(500).json({ message: "Server error during token refresh" });
+  }
+});
+
+// ✅ NEW: Session check endpoint
+router.get("/session", async (req, res) => {
+  try {
+    const { refreshToken } = req.cookies;
+
+    if (!refreshToken) {
+      return res.status(401).json({ message: "No session found" });
+    }
+
+    // Verify refresh token
+    jwt.verify(
+      refreshToken,
+      process.env.REFRESH_TOKEN_SECRET || process.env.JWT_SECRET + "_refresh",
+      async (err, decoded) => {
+        if (err) {
+          res.clearCookie("refreshToken");
+          return res.status(403).json({ message: "Invalid session" });
+        }
+
+        // Get user from database
+        const user = await User.findById(decoded.id);
+        if (!user || !user.isActive) {
+          res.clearCookie("refreshToken");
+          return res
+            .status(404)
+            .json({ message: "User not found or inactive" });
+        }
+
+        // Generate new access token for the session
+        const { accessToken } = generateSecureTokens(user);
+
+        res.json({
+          token: accessToken,
+          user: {
+            id: user._id,
+            username: user.username,
+            email: user.email,
+            firstName: user.firstName,
+            lastName: user.lastName,
+            fullName: user.fullName,
+            age: user.age,
+            fullAddress: user.fullAddress,
+            lastLogin: user.lastLogin,
+            createdAt: user.createdAt,
+          },
+        });
+      }
+    );
+  } catch (error) {
+    console.error("Session check error:", error);
+    res.status(500).json({ message: "Server error during session check" });
+  }
+});
+
+// ✅ NEW: Secure logout endpoint
+router.post("/logout", (req, res) => {
+  // Clear the refresh token cookie
+  res.clearCookie("refreshToken", {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "strict",
+    path: "/",
+  });
+
+  res.json({ message: "Logged out successfully" });
+});
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 // Enhanced signup endpoint for complete form
 // Enhanced signup endpoint for complete form
 router.post("/signup", signupValidation, async (req, res) => {
