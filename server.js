@@ -23,6 +23,7 @@ app.use(
     origin: [
       process.env.FRONTEND_URL || "https://trentbank.netlify.app",
       "https://trentbank.netlify.app/",
+      "https://trentbank.onrender.com",
     ],
     credentials: true,
   })

@@ -87,7 +87,6 @@ router.post("/login", loginValidation, async (req, res) => {
       sameSite: "lax",
       maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
       path: "/",
-      domain: ".trentbank.netlify.app",
     });
 
 
