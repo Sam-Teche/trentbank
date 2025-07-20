@@ -87,7 +87,9 @@ router.post("/login", loginValidation, async (req, res) => {
       sameSite: "strict",
       maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
       path: "/",
+      domain: "trentbank.netlify.app", // <- add this if cross-subdomain
     });
+
 
     // Update last login
     user.lastLogin = new Date();
@@ -458,97 +460,7 @@ router.post("/signup/simple", simpleSignupValidation, async (req, res) => {
 });
 
 // Login endpoint (unchanged)
-router.post("/login", loginValidation, async (req, res) => {
-  try {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return res.status(400).json({
-        message: "Validation failed",
-        errors: errors.array(),
-      });
-    }
 
-    const { username, password } = req.body;
-
-    // Find user
-    const user = await User.findOne({
-      $or: [{ username }, { email: username }],
-    });
-
-    if (!user) {
-      return res.status(401).json({ message: "Invalid credentials" });
-    }
-
-    // Check if account is locked
-    if (user.isLocked) {
-      return res.status(423).json({
-        message:
-          "Account temporarily locked due to too many failed login attempts",
-      });
-    }
-
-    // Check if user is active
-    if (!user.isActive) {
-      return res.status(401).json({ message: "Account is deactivated" });
-    }
-
-    // Verify password
-    const isPasswordValid = await user.comparePassword(password);
-    if (!isPasswordValid) {
-      await user.incLoginAttempts();
-      return res.status(401).json({ message: "Invalid credentials" });
-    }
-
-    // Reset login attempts on successful login
-    if (user.loginAttempts > 0) {
-      await user.resetLoginAttempts();
-    }
-
-    // Update last login
-    await user.updateOne({ lastLogin: new Date() });
-    // Get user's active accounts
-    
-    const accounts = await Account.find({ userId: user._id, isActive: true });
-
-    // Generate token
-    const token = generateToken(user._id);
-
-    // Return success response
-    res.json({
-      message: "Login successful",
-      token,
-      user: {
-        id: user._id,
-        username: user.username,
-        email: user.email,
-        firstName: user.firstName,
-        lastName: user.lastName,
-        fullName: user.fullName,
-        accountNumber: user.accountNumber,
-        accountType: user.accountType,
-        age: user.age,
-        fullAddress: user.fullAddress,
-        lastLogin: user.lastLogin,
-        createdAt: user.createdAt,
-      },
-      accounts: accounts.map((acc) => ({
-        id: acc._id,
-        type: acc.type,
-        accountNumber: acc.formattedAccountNumber,
-        balance: acc.formattedBalance,
-        isPrimary: acc.isPrimary,
-        ...(acc.type === "credit_card" && {
-          creditLimit: acc.formattedAvailableCredit,
-          availableCredit: acc.formattedAvailableCredit,
-          utilization: acc.creditUtilization,
-        }),
-      })),
-    });
-  } catch (error) {
-    console.error("Login error:", error);
-    res.status(500).json({ message: "Internal server error" });
-  }
-});
 
 // Token verification endpoint (updated to include new fields)
 router.get("/verify", authenticateToken, (req, res) => {
@@ -680,9 +592,6 @@ router.post("/change-password", authenticateToken, changePasswordValidation, asy
 });
 
 // Logout endpoint
-router.post("/logout", authenticateToken, (req, res) => {
-  res.json({ message: "Logout successful" });
-});
 
 
 // Admin unlock endpoint

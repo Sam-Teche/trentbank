@@ -3,7 +3,11 @@ const mongoose = require("mongoose");
 const cors = require("cors");
 const helmet = require("helmet");
 const cookieParser = require("cookie-parser");
-const { limiter, authLimiter } = require("./middleware/rateLimiter");
+const {
+  limiter,
+  authLimiter,
+  loginLimiter,
+} = require("./middleware/rateLimiter");
 const { errorHandler, notFoundHandler } = require("./middleware/errorHandler");
 const { initializeSampleData } = require("./utils/sampleData");
 const authRoutes = require("./routes/auth");
@@ -17,8 +21,7 @@ app.use(helmet());
 app.use(
   cors({
     origin: [
-      process.env.FRONTEND_URL || 
-      "https://trentbank.netlify.app",
+      process.env.FRONTEND_URL || "https://trentbank.netlify.app",
       "https://trentbank.netlify.app/",
     ],
     credentials: true,
@@ -27,9 +30,9 @@ app.use(
 app.use(express.json({ limit: "10mb" }));
 app.use(cookieParser());
 app.set("trust proxy", 1);
-// Rate limiting
+
+// Apply general rate limiting to all routes
 app.use(limiter);
-app.use("/api/auth", authLimiter);
 
 // MongoDB connection
 const MONGODB_URI =
@@ -37,17 +40,12 @@ const MONGODB_URI =
 
 mongoose
   .connect(MONGODB_URI, {
-    //useNewUrlParser: true,
-    //useUnifiedTopology: true,
-    serverSelectionTimeoutMS: 30000, // Add timeout settings
+    serverSelectionTimeoutMS: 30000,
     socketTimeoutMS: 45000,
   })
   .then(async () => {
     console.log("✅ Connected to MongoDB");
-
-    // Initialize sample data AFTER MongoDB connection is established
     await initializeSampleData();
-
     console.log("📝 Sample users for testing:");
     console.log(
       "   Username: john_doe, Email: john@example.com, Password: password123"
@@ -61,7 +59,7 @@ mongoose
     process.exit(1);
   });
 
-// Health check route
+// Health check route (before rate limiting)
 app.get("/api/health", (req, res) => {
   res.json({
     status: "OK",
@@ -72,24 +70,28 @@ app.get("/api/health", (req, res) => {
   });
 });
 
+// Apply auth rate limiting to all auth routes
+
+
+// Apply specific login rate limiting to login route only
+app.use("/api/auth/login", loginLimiter);
+
+
+app.use("/api/auth", authLimiter);
 // Routes
 app.use("/api/auth", authRoutes);
 app.use("/api/user", userRoutes);
 
 // Error handling middleware
-app.use(errorHandler);
 app.use(notFoundHandler);
+app.use(errorHandler);
 
 const PORT = process.env.PORT || 3000;
 
-// Start server
 app.listen(PORT, () => {
   console.log(`🚀 Trent Bank Backend Server running on port ${PORT}`);
   console.log(`📊 Environment: ${process.env.NODE_ENV || "development"}`);
   console.log(`🔗 Database: ${MONGODB_URI}`);
-
-  // Remove the sample data initialization from here
-  // It's now handled in the MongoDB connection .then() block
 });
 
 // Graceful shutdown
