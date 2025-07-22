@@ -28,7 +28,10 @@ const authenticateToken = (req, res, next) => {
     // Use ACCESS_TOKEN_SECRET, fallback to JWT_SECRET for backward compatibility
     const secret = process.env.ACCESS_TOKEN_SECRET || process.env.JWT_SECRET;
     const decoded = jwt.verify(token, secret);
-    req.user = decoded;
+    req.user = {
+      ...decoded,
+      _id: decoded.id || decoded._id, // Use whichever exists
+    };
     next();
   } catch (error) {
     console.error("Token verification error:", error);
