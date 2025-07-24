@@ -12,6 +12,7 @@ const { errorHandler, notFoundHandler } = require("./middleware/errorHandler");
 const { initializeSampleData } = require("./utils/sampleData");
 const authRoutes = require("./routes/auth");
 const userRoutes = require("./routes/user");
+const adminDashboardRoutes = require("./routes/adminDashboard");
 require("dotenv").config();
 
 const app = express();
@@ -82,6 +83,7 @@ app.use("/api/auth", authLimiter);
 // Routes
 app.use("/api/auth", authRoutes);
 app.use("/api/user", userRoutes);
+app.use("/api/admin/dashboard", adminDashboardRoutes);
 
 // Error handling middleware
 app.use(notFoundHandler);
