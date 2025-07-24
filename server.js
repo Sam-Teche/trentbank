@@ -25,6 +25,8 @@ app.use(
       process.env.FRONTEND_URL || "https://trentbank.netlify.app",
       "https://trentbank.netlify.app/",
       "https://trentbank.onrender.com",
+      "https://trentadmin.netlify.app/",
+      "https://trentadmin.netlify.app",
     ],
     credentials: true,
   })
