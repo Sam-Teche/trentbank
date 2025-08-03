@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Transfer Processing - Secure Money Transfer</title>
+    <link rel="stylesheet" href="styles/pending.css">
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="status-icon">⏳</div>
+            <h1>Pending</h1>
+            <p>Your money transfer is being processed securely</p>
+        </div>
+
+        <div class="content">
+            <div class="notification-banner">
+                <span class="icon">📧</span>
+                <p>A confirmation email has been sent to your registered email address</p>
+            </div>
+
+            <div class="progress-section">
+                <h3>Processing Your Transfer</h3>
+                <div class="progress-bar">
+                    <div class="progress-fill"></div>
+                </div>
+                <p>Please wait while we process your transaction...</p>
+            </div>
+
+            <div class="status-steps">
+                <div class="step completed">
+                    <div class="step-circle">✓</div>
+                    <div class="step-label">Verified</div>
+                </div>
+                <div class="step completed">
+                    <div class="step-circle">✓</div>
+                    <div class="step-label">Authorized</div>
+                </div>
+                <div class="step active">
+                    <div class="step-circle">⏳</div>
+                    <div class="step-label">Processing</div>
+                </div>
+                <div class="step">
+                    <div class="step-circle">4</div>
+                    <div class="step-label">Completed</div>
+                </div>
+            </div>
+
+            <div class="transfer-details">
+                <div class="detail-row">
+                    <span class="detail-label">Recipient Name</span>
+                    <span class="detail-value" id="recipientName">Loading...</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Transfer Amount</span>
+                    <span class="detail-value amount-highlight" id="transferAmount">$0.00</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Processing Fee</span>
+                    <span class="detail-value" id="processingFee">$0.00</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Total Debited</span>
+                    <span class="detail-value amount-highlight" id="totalAmount">$0.00</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Recipient Bank</span>
+                    <span class="detail-value" id="recipientBank">Loading...</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Account Number</span>
+                    <span class="detail-value" id="accountNumber">Loading...</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Transaction Date</span>
+                    <span class="detail-value" id="transactionDate">Loading...</span>
+                </div>
+            </div>
+
+            <div class="reference-number">
+                <h3>📋 Transaction Reference</h3>
+                <div class="ref-code" id="referenceCode">TXN-240628-XXXX</div>
+                <p class="ref-note">Save this reference number for your records</p>
+            </div>
+
+            <div class="estimated-time">
+                <div class="time-icon">⏰</div>
+                <h3>Estimated Completion Time</h3>
+                <p><strong>1-3 Business Days</strong><br>
+                You'll receive a notification once the transfer is complete</p>
+            </div>
+
+            <div class="security-notice">
+                <span class="icon">🔒</span>
+                <p>Your transfer is protected by bank-level security and encryption. All transactions are monitored for suspicious activity.</p>
+            </div>
+
+            <div class="actions">
+                <a href="#" class="btn btn-secondary" onclick="printReceipt()">
+                    🖨️ Print Receipt
+                </a>
+                <a href="transfermoney.html" class="btn btn-primary">
+                    🏠 New Transfer
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Load transfer data from sessionStorage
+            const data = JSON.parse(sessionStorage.getItem('transferData'));
+            
+            if (data) {
+                // Populate recipient full name
+                const combinedFullName = `${data.firstName || ''} ${data.middleName || ''} ${data.lastName || ''}`.trim();
+                document.getElementById('recipientName').textContent = combinedFullName || 'Not provided';
+
+                // Populate transfer details
+                if (data.transferAmount) {
+                    const amount = parseFloat(data.transferAmount);
+                    const fee = amount * 0.006; // 0.6% fee
+                    const total = amount + fee;
+
+                    document.getElementById('transferAmount').textContent = `$${amount.toFixed(2)}`;
+                    document.getElementById('processingFee').textContent = `$${fee.toFixed(2)}`;
+                    document.getElementById('totalAmount').textContent = `$${total.toFixed(2)}`;
+                }
+
+                // Bank information
+                const bankOptions = {
+                    'ally': 'Ally Bank',
+                    'american_express': 'American Express Bank',
+                    'arvest': 'Arvest Bank',
+                    'associated': 'Associated Bank',
+                    'bancorpsouth': 'BancorpSouth Bank',
+                    'bank_of_america': 'Bank of America',
+                    'bank_of_hawaii': 'Bank of Hawaii',
+                    'bank_of_the_west': 'Bank of the West',
+                    'bb_t': 'BB&T (Truist)',
+                    'bmo_harris': 'BMO Harris Bank',
+                    'bokf': 'BOK Financial',
+                    'capital_one': 'Capital One',
+                    'charles_schwab': 'Charles Schwab Bank',
+                    'chase': 'Chase Bank (JPMorgan Chase)',
+                    'citibank': 'Citibank',
+                    'citizens': 'Citizens Bank',
+                    'comerica': 'Comerica Bank',
+                    'commerce': 'Commerce Bank',
+                    'compass': 'BBVA USA (Compass Bank)',
+                    'discover': 'Discover Bank',
+                    'east_west': 'East West Bank',
+                    'fifth_third': 'Fifth Third Bank',
+                    'first_citizens': 'First Citizens Bank',
+                    'first_horizon': 'First Horizon Bank',
+                    'first_national': 'First National Bank',
+                    'first_republic': 'First Republic Bank',
+                    'flagstar': 'Flagstar Bank',
+                    'frost': 'Frost Bank',
+                    'fulton': 'Fulton Bank',
+                    'goldman_sachs': 'Goldman Sachs Bank',
+                    'great_western': 'Great Western Bank',
+                    'hancock_whitney': 'Hancock Whitney Bank',
+                    'hsbc': 'HSBC Bank USA',
+                    'huntington': 'Huntington National Bank',
+                    'iberia': 'Iberia Bank',
+                    'key_bank': 'KeyBank',
+                    'm_t': 'M&T Bank',
+                    'morgan_stanley': 'Morgan Stanley Bank',
+                    'navy_federal': 'Navy Federal Credit Union',
+                    'northern_trust': 'Northern Trust',
+                    'old_national': 'Old National Bank',
+                    'park_national': 'Park National Bank',
+                    'pinnacle': 'Pinnacle Financial Partners',
+                    'pnc': 'PNC Bank',
+                    'popular': 'Popular Bank',
+                    'raymond_james': 'Raymond James Bank',
+                    'regions': 'Regions Bank',
+                    'santander': 'Santander Bank',
+                    'signature': 'Signature Bank',
+                    'state_street': 'State Street Bank',
+                    'suntrust': 'SunTrust Bank (Truist)',
+                    'synovus': 'Synovus Bank',
+                    'td_bank': 'TD Bank',
+                    'trustmark': 'Trustmark Bank',
+                    'umb': 'UMB Bank',
+                    'union_bank': 'Union Bank',
+                    'us_bank': 'U.S. Bank',
+                    'usaa': 'USAA Bank',
+                    'valley_national': 'Valley National Bank',
+                    'webster': 'Webster Bank',
+                    'wells_fargo': 'Wells Fargo',
+                    'western_alliance': 'Western Alliance Bank',
+                    'whitney': 'Whitney Bank',
+                    'zions': 'Zions Bank',
+                    'other': 'Other'
+                };
+
+                document.getElementById('recipientBank').textContent = bankOptions[data.bankName] || data.bankName || 'Unknown Bank';
+                
+                // Mask account number
+                if (data.accountNumber) {
+                    const maskedAccount = '****' + data.accountNumber.slice(-4);
+                    document.getElementById('accountNumber').textContent = maskedAccount;
+                }
+            }
+
+            // Set current date
+            const now = new Date();
+            const dateString = now.toLocaleDateString('en-US', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+            document.getElementById('transactionDate').textContent = dateString;
+
+            // Generate reference number
+            const refNumber = 'TXN-' + now.getFullYear().toString().slice(-2) + 
+                             (now.getMonth() + 1).toString().padStart(2, '0') + 
+                             now.getDate().toString().padStart(2, '0') + '-' + 
+                             Math.random().toString(36).substr(2, 4).toUpperCase();
+            document.getElementById('referenceCode').textContent = refNumber;
+
+            setInterval(() => {
+                console.log('Checking transfer status... Still processing...');
+                // Update progress bar occasionally to show activity
+                const progressFill = document.querySelector('.progress-fill');
+                const currentWidth = parseInt(progressFill.style.width) || 75;
+                if (currentWidth < 85) {
+                    progressFill.style.width = (currentWidth + 1) + '%';
+                } else {
+                    progressFill.style.width = '75%';
+                }
+            }, 5000);
+        });
+
+        function printReceipt() {
+            window.print();
+        }
+
+        // Simulate periodic "checking" but never complete
+        let refreshCount = 0;
+        
+        function simulateRefresh() {
+            refreshCount++;
+            console.log(`Checking transfer status... Attempt ${refreshCount} - Still processing...`);
+            
+            // Show some activity in the UI
+            const processingStep = document.querySelector('.step.active .step-circle');
+            if (processingStep) {
+                processingStep.style.opacity = '0.5';
+                setTimeout(() => {
+                    processingStep.style.opacity = '1';
+                }, 500);
+            }
+        }
+
+        // Check status every 15 seconds but never complete
+        setInterval(simulateRefresh, 15000);
+    </script>
+</body>
+</html>

@@ -1,0 +1,941 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BankPro Dashboard</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="styles/homepage.css"> 
+</head>
+<body>
+    <!-- Loading Spinner -->
+    <div id="loadingSpinner" class="loading-spinner">
+        <div class="spinner"></div>
+        <p>Loading your dashboard...</p>
+    </div>
+
+    <!-- Header -->
+    <header class="header">
+        <div class="header-content">
+            <div class="header-left">
+                <div class="logo">
+                    <i class="fas fa-home"></i>
+                </div>
+                <div class="header-title">
+                    <h1>Trent Bank</h1>
+                    <p id="welcomeMessage">Welcome back</p>
+                </div>
+            </div>
+            <div class="header-right">
+                <button class="header-btn">
+                    <i class="fas fa-bell"></i>
+                </button>
+                <button class="header-btn">
+                    <i class="fas fa-cog"></i>
+                </button>
+                <div class="profile-avatar">
+                    <i class="fas fa-user"></i>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <!-- Account Overview -->
+        <div class="accounts-grid" id="accountsGrid">
+            <!-- Accounts will be populated dynamically -->
+        </div>
+
+        <div class="dashboard-grid">
+            <!-- Left Column -->
+            <div class="left-column">
+                <!-- Quick Actions -->
+                <div class="card">
+                    <div class="card-header">
+                        <h2 class="card-title">Quick Actions</h2>
+                    </div>
+                    <div class="quick-actions-grid">
+                        <button class="quick-action" onclick="window.location.href='transfermoney.html'">
+                            <div class="action-icon blue">
+                                <i class="fas fa-paper-plane"></i>
+                            </div>
+                            <span class="action-text">Transfer Money</span>
+                        </button>
+                        <button class="quick-action" onclick="showPayBillsPopup()">
+                            <div class="action-icon green">
+                                <i class="fas fa-credit-card"></i>
+                            </div>
+                            <span class="action-text">Pay Bills</span>
+                        </button>
+                        <button class="quick-action" onclick="showDepositPopup()">
+                            <div class="action-icon purple">
+                                <i class="fas fa-download"></i>
+                            </div>
+                            <span class="action-text">Deposit Check</span>
+                        </button>
+                        <button class="quick-action" onclick="showAddAccountPopup()">
+                            <div class="action-icon orange">
+                                <i class="fas fa-plus"></i>
+                            </div>
+                            <span class="action-text">Add Account</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Popup overlays -->
+                <div class="popup-overlay" id="depositPopupOverlay">
+                    <div class="popup-container">
+                        <button class="close-x" onclick="hideDepositPopup()">&times;</button>
+                        <div class="warning-icon">⚠</div>
+                        <h2 class="popup-title">Service Unavailable</h2>
+                        <p class="popup-message">Deposit Check not available at the moment</p>
+                        <button class="close-btn" onclick="hideDepositPopup()">OK</button>
+                    </div>
+                </div>
+        
+                <div class="popup-overlay" id="payBillsPopupOverlay">
+                    <div class="popup-container">
+                        <button class="close-x" onclick="hidePayBillsPopup()">&times;</button>
+                        <div class="warning-icon">⚠</div>
+                        <h2 class="popup-title">Service Unavailable</h2>
+                        <p class="popup-message">Pay Bills not available at the moment</p>
+                        <button class="close-btn" onclick="hidePayBillsPopup()">OK</button>
+                    </div>
+                </div>
+
+                <div class="popup-overlay" id="addAccountPopupOverlay">
+                    <div class="popup-container">
+                        <button class="close-x" onclick="hideAddAccountPopup()">&times;</button>
+                        <div class="warning-icon">⚠</div>
+                        <h2 class="popup-title">Service Unavailable</h2>
+                        <p class="popup-message">Add Account not available at the moment</p>
+                        <button class="close-btn" onclick="hideAddAccountPopup()">OK</button>
+                    </div>
+                </div>
+
+                <!-- Recent Transactions -->
+                <div class="card">
+                    <div class="card-header">
+                        <h2 class="card-title">Recent Transactions</h2>
+                        <a href="#" class="card-action">View All</a>
+                    </div>
+                    <div class="transactions-list" id="transactionsList">
+                        <!-- Transactions will be populated dynamically -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Column -->
+            <div class="right-column">
+                <!-- Spending Overview -->
+                <div class="card">
+                    <div class="spending-header">
+                        <h2 class="card-title">Spending Overview</h2>
+                        <select class="period-select">
+                            <option>This Month</option>
+                            <option>Last Month</option>
+                            <option>This Year</option>
+                        </select>
+                    </div>
+                    
+                    <div class="spending-chart">
+                        <div class="chart-container">
+                            <svg width="128" height="128" viewBox="0 0 128 128">
+                                <circle cx="64" cy="64" r="57" fill="none" stroke="#e5e7eb" stroke-width="10"/>
+                                <circle cx="64" cy="64" r="57" fill="none" stroke="#3b82f6" stroke-width="10" 
+                                        stroke-dasharray="358" stroke-dashoffset="107" stroke-linecap="round" 
+                                        transform="rotate(-90 64 64)"/>
+                            </svg>
+                            <div class="chart-center">
+                                <div class="chart-amount">$912</div>
+                                <div class="chart-label">Spent</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="spending-categories">
+                        <div class="category-item">
+                            <div class="category-left">
+                                <div class="category-dot red"></div>
+                                <span class="category-name">Food & Dining</span>
+                            </div>
+                            <div class="category-right">
+                                <div class="category-amount">$320.45</div>
+                                <div class="category-percentage">35%</div>
+                            </div>
+                        </div>
+
+                        <div class="category-item">
+                            <div class="category-left">
+                                <div class="category-dot blue"></div>
+                                <span class="category-name">Transportation</span>
+                            </div>
+                            <div class="category-right">
+                                <div class="category-amount">$180.30</div>
+                                <div class="category-percentage">20%</div>
+                            </div>
+                        </div>
+
+                        <div class="category-item">
+                            <div class="category-left">
+                                <div class="category-dot green"></div>
+                                <span class="category-name">Shopping</span>
+                            </div>
+                            <div class="category-right">
+                                <div class="category-amount">$225.60</div>
+                                <div class="category-percentage">25%</div>
+                            </div>
+                        </div>
+
+                        <div class="category-item">
+                            <div class="category-left">
+                                <div class="category-dot yellow"></div>
+                                <span class="category-name">Entertainment</span>
+                            </div>
+                            <div class="category-right">
+                                <div class="category-amount">$95.40</div>
+                                <div class="category-percentage">10%</div>
+                            </div>
+                        </div>
+
+                        <div class="category-item">
+                            <div class="category-left">
+                                <div class="category-dot gray"></div>
+                                <span class="category-name">Other</span>
+                            </div>
+                            <div class="category-right">
+                                <div class="category-amount">$90.25</div>
+                                <div class="category-percentage">10%</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Financial Goals -->
+                <div class="card">
+                    <h2 class="card-title">Financial Goals</h2>
+                    
+                    <div class="goal-item emergency">
+                        <div class="goal-header">
+                            <span class="goal-name">Emergency Fund</span>
+                            <span class="goal-percentage blue">75%</span>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill blue" style="width: 75%"></div>
+                        </div>
+                        <p class="goal-amount">$7,500 of $10,000</p>
+                    </div>
+                    
+                    <div class="goal-item vacation">
+                        <div class="goal-header">
+                            <span class="goal-name">Vacation Fund</span>
+                            <span class="goal-percentage green">45%</span>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill green" style="width: 45%"></div>
+                        </div>
+                        <p class="goal-amount">$2,250 of $5,000</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script src="js/authManager.js"></script>
+    <script>
+        // Global variables to store user data
+let userData = null;
+let userAccounts = [];
+let userTransactions = [];
+
+// Updated getAuthToken function to work with new authManager
+async function getAuthToken() {
+    try {
+        await authManager.initialize();
+        return authManager.getToken();
+    } catch (error) {
+        console.error("Failed to get auth token:", error);
+        return null;
+    }
+}
+
+// Updated API call function with better error handling
+async function apiCall(endpoint, options = {}) {
+    try {
+        const token = await getAuthToken();
+        
+        if (!token) {
+            console.error("No authentication token available");
+            authManager.logout();
+            return null;
+        }
+
+        const defaultOptions = {
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
+            credentials: "include"
+        };
+
+        const mergedOptions = {
+            ...defaultOptions,
+            ...options,
+            headers: {
+                ...defaultOptions.headers,
+                ...options.headers
+            }
+        };
+
+        console.log(`Making API call to: ${API_BASE_URL}${endpoint}`);
+        const response = await fetch(`${API_BASE_URL}${endpoint}`, mergedOptions);
+
+        if (response.status === 401) {
+            console.warn("Token expired, attempting refresh...");
+            const refreshed = await authManager.refreshToken();
+            if (refreshed) {
+                // Retry with new token
+                mergedOptions.headers.Authorization = `Bearer ${authManager.getToken()}`;
+                return await fetch(`${API_BASE_URL}${endpoint}`, mergedOptions);
+            } else {
+                console.error("Token refresh failed");
+                return null;
+            }
+        }
+
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        return await response.json();
+    } catch (error) {
+        console.error('API call failed:', error);
+        throw error;
+    }
+}
+
+// Fetch user profile and account data
+async function fetchUserData() {
+    try {
+        showLoadingSpinner();
+        console.log("Fetching user data...");
+        
+        const data = await apiCall('/user/profile');
+        
+        if (!data) {
+            throw new Error("No data received from API");
+        }
+        
+        userData = data.user;
+        userAccounts = data.accounts || [];
+        userTransactions = data.transactions || [];
+
+        console.log("User data fetched successfully:", {
+            user: userData?.username,
+            accounts: userAccounts.length,
+            transactions: userTransactions.length
+        });
+
+        populateUserData();
+        hideLoadingSpinner();
+    } catch (error) {
+        console.error('Failed to fetch user data:', error);
+        hideLoadingSpinner();
+        showErrorMessage('Failed to load dashboard data. Please try refreshing the page.');
+    }
+}
+
+// Populate the UI with user data
+function populateUserData() {
+    // Update welcome message
+    const welcomeMessage = document.getElementById('welcomeMessage');
+    if (userData && userData.firstName) {
+        welcomeMessage.textContent = `Welcome back, ${userData.firstName}`;
+    }
+
+    // Populate accounts
+    populateAccounts();
+
+    // Populate transactions
+    populateTransactions();
+}
+
+// Populate account cards
+function populateAccounts() {
+    const accountsGrid = document.getElementById('accountsGrid');
+    accountsGrid.innerHTML = '';
+
+    if (userAccounts.length === 0) {
+        // Show default accounts structure if no accounts returned
+        accountsGrid.innerHTML = `
+            <div class="account-card">
+                <div class="account-header">
+                    <div class="account-info">
+                        <h3>Checking Account</h3>
+                        <p>****0000</p>
+                    </div>
+                    <div class="account-icon checking">
+                        <i class="fas fa-credit-card"></i>
+                    </div>
+                </div>
+                <div class="account-balance">
+                    <div class="balance-info">
+                        <div class="balance" data-balance="0.00" data-hidden="false">$0.00</div>
+                    </div>
+                    <button class="balance-toggle" onclick="toggleBalance(this)">
+                        <i class="fas fa-eye"></i>
+                    </button>
+                </div>
+            </div>
+        `;
+        return;
+    }
+
+    userAccounts.forEach(account => {
+        const accountCard = createAccountCard(account);
+        accountsGrid.appendChild(accountCard);
+    });
+}
+
+// Create account card element
+function createAccountCard(account) {
+    const div = document.createElement('div');
+    div.className = 'account-card';
+
+    const accountTypeName = getAccountTypeName(account.type);
+    const accountIconClass = getAccountIconClass(account.type);
+    const maskedNumber = `****${account.number?.slice(-4) || '0000'}`;
+    const formattedBalance = formatCurrency(account.balance);
+
+    div.innerHTML = `
+        <div class="account-header">
+            <div class="account-info">
+                <h3>${accountTypeName}</h3>
+                <p>${maskedNumber}</p>
+            </div>
+            <div class="account-icon ${accountIconClass}">
+                <i class="fas fa-credit-card"></i>
+            </div>
+        </div>
+        <div class="account-balance">
+            <div class="balance-info">
+                <div class="balance" data-balance="${account.balance}" data-hidden="false">${formattedBalance}</div>
+                ${account.limit ? `<div class="limit">Limit: ${formatCurrency(account.limit)}</div>` : ''}
+            </div>
+            <button class="balance-toggle" onclick="toggleBalance(this)">
+                <i class="fas fa-eye"></i>
+            </button>
+        </div>
+    `;
+
+    return div;
+}
+
+// Get account type display name
+function getAccountTypeName(type) {
+    const typeMap = {
+        'checking': 'Checking Account',
+        'savings': 'Savings Account',
+        'credit_card': 'Credit Card',
+        'credit': 'Credit Card'
+    };
+    return typeMap[type] || 'Account';
+}
+
+// Get account icon class
+function getAccountIconClass(type) {
+    const classMap = {
+        'checking': 'checking',
+        'savings': 'savings',
+        'credit_card': 'credit',
+        'credit': 'credit'
+    };
+    return classMap[type] || 'checking';
+}
+
+
+
+// Enhanced transaction status checking and UI updates
+class TransactionStatusManager {
+    constructor() {
+        this.checkInterval = null;
+        this.isChecking = false;
+    }
+
+    // Start checking transaction status
+    startStatusChecking(transactionId, callback) {
+        if (this.isChecking) return;
+        
+        this.isChecking = true;
+        this.checkInterval = setInterval(async () => {
+            try {
+                const response = await fetch(`/api/user/transaction/${transactionId}`, {
+                    headers: {
+                        'Authorization': `Bearer ${localStorage.getItem('token')}`
+                    },
+                    credentials: 'include'
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    callback(data.transaction);
+                    
+                    // Stop checking if transaction is no longer pending
+                    if (data.transaction.status !== 'pending') {
+                        this.stopStatusChecking();
+                    }
+                }
+            } catch (error) {
+                console.error('Status check error:', error);
+            }
+        }, 5000); // Check every 5 seconds
+    }
+
+    // Stop checking transaction status
+    stopStatusChecking() {
+        if (this.checkInterval) {
+            clearInterval(this.checkInterval);
+            this.checkInterval = null;
+        }
+        this.isChecking = false;
+    }
+}
+
+// Enhanced transaction list population with real-time updates
+let statusManager = new TransactionStatusManager();
+
+
+
+
+function populateTransactions() {
+    const transactionsList = document.getElementById('transactionsList');
+    
+    if (userTransactions.length === 0) {
+        transactionsList.innerHTML = `
+            <div class="transaction-item">
+                <div class="transaction-left">
+                    <div class="transaction-icon">
+                        <i class="fas fa-info-circle"></i>
+                    </div>
+                    <div class="transaction-info">
+                        <h4>No Recent Transactions</h4>
+                        <p>Start using your account to see transactions here</p>
+                    </div>
+                </div>
+            </div>
+        `;
+        return;
+    }
+
+    transactionsList.innerHTML = '';
+    userTransactions.forEach(transaction => {
+        const transactionElement = createTransactionElement(transaction);
+        transactionsList.appendChild(transactionElement);
+        
+        // Start checking status for pending transactions
+        if (transaction.status === 'pending') {
+            statusManager.startStatusChecking(transaction.id, (updatedTransaction) => {
+                const index = userTransactions.findIndex(t => t.id === updatedTransaction.id);
+                if (index !== -1) {
+                    userTransactions[index] = updatedTransaction;
+                    populateTransactions();
+                    
+                    if (updatedTransaction.status === 'completed') {
+                        updateUserBalance();
+                    }
+                }
+            });
+        }
+    });
+}
+
+
+// Function to update user balance
+async function updateUserBalance() {
+    try {
+        const response = await fetch('/api/user/balance', {
+            headers: {
+                'Authorization': `Bearer ${localStorage.getItem('token')}`
+            },
+            credentials: 'include'
+        });
+
+        if (response.ok) {
+            const data = await response.json();
+            // Update balance display if element exists
+            const balanceElement = document.querySelector('.balance-amount, #balance');
+            if (balanceElement) {
+                balanceElement.textContent = formatCurrency(data.balance);
+            }
+        }
+    } catch (error) {
+        console.error('Balance update error:', error);
+    }
+}
+
+// Enhanced create transaction element with status indicators
+function createTransactionElement(transaction) {
+    const div = document.createElement('div');
+    div.className = 'transaction-item';
+    div.setAttribute('data-transaction-id', transaction.id);
+    
+    // Add status-specific classes
+    if (transaction.status === 'pending') {
+        div.className += ' pending';
+    } else if (transaction.status === 'failed') {
+        div.className += ' failed';
+    } else if (transaction.status === 'completed') {
+        div.className += ' completed';
+    }
+
+    const isCredit = transaction.type.toLowerCase() === 'credit';
+    const amount = Math.abs(transaction.amount);
+    const formattedAmount = isCredit ? `+${formatCurrency(amount)}` : `-${formatCurrency(amount)}`;
+    const amountClass = isCredit ? 'credit' : 'debit';
+
+    const transactionDate = formatTransactionDate(transaction.date);
+    const icon = getTransactionIcon(transaction.description);
+
+    let statusText = '';
+    if (transaction.status === 'pending') statusText = ' • Pending';
+    else if (transaction.status === 'failed') statusText = ' • Failed';
+    else if (transaction.status === 'completed') statusText = ' • Successful';
+
+
+    div.innerHTML = `
+        <div class="transaction-left">
+            <div class="transaction-icon">
+                <i class="fas ${icon}"></i>
+            </div>
+            <div class="transaction-info">
+                <h4>${transaction.description}</h4>
+                <p>${getTransactionCategory(transaction.description)}${statusText}</p>
+            </div>
+        </div>
+        <div class="transaction-right">
+            <div class="transaction-amount ${amountClass}">${formattedAmount}</div>
+            <div class="transaction-date">${transactionDate}</div>
+        </div>
+    `;
+
+    div.style.cursor = 'pointer';
+    
+    // Add hover effects (ADD THIS)
+    div.addEventListener('mouseenter', () => {
+        div.style.backgroundColor = '#f8f9fa';
+        div.style.transform = 'translateX(5px)';
+    });
+    
+    div.addEventListener('mouseleave', () => {
+        div.style.backgroundColor = '';
+        div.style.transform = '';
+    });
+
+    // Add click handler to open transaction details (ADD THIS)
+    div.addEventListener('click', () => {
+        openTransactionDetails(transaction.id);
+    });
+
+
+    return div;
+}
+
+
+
+function openTransactionDetails(transactionId) {
+    // Option A: Open in same window
+    window.location.href = `transaction-details.html?id=${transactionId}`;
+}
+
+// Get transaction icon based on description
+function getTransactionIcon(description) {
+    const desc = description.toLowerCase();
+    if (desc.includes('amazon') || desc.includes('shopping')) return 'fa-shopping-bag';
+    if (desc.includes('salary') || desc.includes('deposit')) return 'fa-trending-up';
+    if (desc.includes('netflix') || desc.includes('entertainment')) return 'fa-mobile-alt';
+    if (desc.includes('gas') || desc.includes('shell') || desc.includes('transport')) return 'fa-car';
+    if (desc.includes('starbucks') || desc.includes('coffee') || desc.includes('food')) return 'fa-coffee';
+    if (desc.includes('transfer')) return 'fa-exchange-alt';
+    return 'fa-credit-card';
+}
+
+// Get transaction category
+function getTransactionCategory(description) {
+    const desc = description.toLowerCase();
+    if (desc.includes('amazon') || desc.includes('shopping')) return 'Shopping';
+    if (desc.includes('salary') || desc.includes('deposit')) return 'Income';
+    if (desc.includes('netflix') || desc.includes('entertainment')) return 'Entertainment';
+    if (desc.includes('gas') || desc.includes('shell') || desc.includes('transport')) return 'Transportation';
+    if (desc.includes('starbucks') || desc.includes('coffee') || desc.includes('food')) return 'Food & Dining';
+    if (desc.includes('transfer')) return 'Transfer';
+    return 'Other';
+}
+
+// Format transaction date
+function formatTransactionDate(dateString) {
+    const txDate = new Date(dateString);
+    const now = new Date();
+    const diffDays = Math.floor((now - txDate) / (86400000));
+
+    if (diffDays === 0) return 'Today ' + txDate.toLocaleTimeString('en-US', 
+        { hour: '2-digit', minute: '2-digit' }).toLowerCase();
+    if (diffDays === 1) return 'Yesterday';
+    if (diffDays < 7) return txDate.toLocaleDateString('en-US', { weekday: 'short' });
+    return txDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+}
+
+// Format currency
+function formatCurrency(amount) {
+    const isNegative = amount < 0;
+    const absAmount = Math.abs(amount);
+    const formatted = new Intl.NumberFormat('en-US', {
+        style: 'currency',
+        currency: 'USD'
+    }).format(absAmount);
+    
+    return isNegative ? `-${formatted}` : formatted;
+}
+
+
+// Function to refresh transactions from server
+async function refreshTransactions() {
+    try {
+        const response = await fetch('/user/profile', {
+            headers: {
+                'Authorization': `Bearer ${localStorage.getItem('token')}`
+            },
+            credentials: 'include'
+        });
+
+        if (response.ok) {
+            const data = await response.json();
+            userTransactions = data.transactions || [];
+            populateTransactions();
+            
+            // Update balance as well
+            if (data.user && data.user.balance !== undefined) {
+                const balanceElement = document.querySelector('.balance-amount, #balance');
+                if (balanceElement) {
+                    balanceElement.textContent = formatCurrency(data.user.balance);
+                }
+            }
+        }
+    } catch (error) {
+        console.error('Transaction refresh error:', error);
+    }
+}
+
+// Auto-refresh transactions every 30 seconds
+setInterval(refreshTransactions, 30000);
+
+// Cleanup when leaving the page
+window.addEventListener('beforeunload', () => {
+    if (statusManager) {
+        statusManager.stopStatusChecking();
+    }
+});
+
+// Loading spinner functions
+function showLoadingSpinner() {
+    const spinner = document.getElementById('loadingSpinner');
+    if (spinner) {
+        spinner.style.display = 'flex';
+    }
+}
+
+function hideLoadingSpinner() {
+    const spinner = document.getElementById('loadingSpinner');
+    if (spinner) {
+        spinner.style.display = 'none';
+    }
+}
+
+// Error message function
+function showErrorMessage(message) {
+    // You can customize this to show a better error UI
+    console.error("Dashboard Error:", message);
+    alert(message);
+}
+
+// Balance toggle function
+function toggleBalance(button) {
+    const card = button.closest('.account-card');
+    const balanceElement = card.querySelector('.balance');
+    const icon = button.querySelector('i');
+    const actualBalance = balanceElement.getAttribute('data-balance');
+    const isHidden = balanceElement.getAttribute('data-hidden') === 'true';
+
+    if (isHidden) {
+        const formatted = formatCurrency(parseFloat(actualBalance));
+        balanceElement.textContent = formatted;
+        balanceElement.setAttribute('data-hidden', 'false');
+        icon.className = 'fas fa-eye';
+    } else {
+        const masked = actualBalance.startsWith('-') ? '-••••••' : '••••••';
+        balanceElement.textContent = masked;
+        balanceElement.setAttribute('data-hidden', 'true');
+        icon.className = 'fas fa-eye-slash';
+    }
+}
+
+// Popup functions
+function showDepositPopup() {
+    const overlay = document.getElementById('depositPopupOverlay');
+    overlay.classList.add('show');
+    document.body.style.overflow = 'hidden';
+}
+
+function hideDepositPopup() {
+    const overlay = document.getElementById('depositPopupOverlay');
+    overlay.classList.remove('show');
+    document.body.style.overflow = 'auto';
+}
+
+function showPayBillsPopup() {
+    const overlay = document.getElementById('payBillsPopupOverlay');
+    overlay.classList.add('show');
+    document.body.style.overflow = 'hidden';
+}
+
+function hidePayBillsPopup() {
+    const overlay = document.getElementById('payBillsPopupOverlay');
+    overlay.classList.remove('show');
+    document.body.style.overflow = 'auto';
+}
+
+function showAddAccountPopup() {
+    const overlay = document.getElementById('addAccountPopupOverlay');
+    overlay.classList.add('show');
+    document.body.style.overflow = 'hidden';
+}
+
+function hideAddAccountPopup() {
+    const overlay = document.getElementById('addAccountPopupOverlay');
+    overlay.classList.remove('show');
+    document.body.style.overflow = 'auto';
+}
+
+// Event listeners for popups
+document.addEventListener('DOMContentLoaded', function() {
+    // Popup event listeners
+    const payBillsOverlay = document.getElementById('payBillsPopupOverlay');
+    if (payBillsOverlay) {
+        payBillsOverlay.addEventListener('click', function(e) {
+            if (e.target === this) hidePayBillsPopup();
+        });
+    }
+
+    const addAccountOverlay = document.getElementById('addAccountPopupOverlay');
+    if (addAccountOverlay) {
+        addAccountOverlay.addEventListener('click', function(e) {
+            if (e.target === this) hideAddAccountPopup();
+        });
+    }
+
+    const depositOverlay = document.getElementById('depositPopupOverlay');
+    if (depositOverlay) {
+        depositOverlay.addEventListener('click', function(e) {
+            if (e.target === this) hideDepositPopup();
+        });
+    }
+
+    // Keyboard events
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            hideDepositPopup();
+            hidePayBillsPopup();
+            hideAddAccountPopup();
+        }
+    });
+
+    // Period selector handler
+    const periodSelect = document.querySelector('.period-select');
+    if (periodSelect) {
+        periodSelect.addEventListener('change', function() {
+            console.log('Period changed to:', this.value);
+            // Here you could fetch updated spending data
+        });
+    }
+
+    // Initialize the dashboard
+    initializeDashboard();
+});
+
+// Initialize dashboard with proper error handling
+async function initializeDashboard() {
+    console.log('Banking Dashboard initializing...');
+    
+    try {
+        showLoadingSpinner();
+        
+        // Wait for auth to initialize first
+        const isAuthenticated = await authManager.initialize();
+        
+        if (!isAuthenticated) {
+            console.warn("No valid session found, redirecting to login");
+            authManager.logout();
+            return;
+        }
+        
+        console.log("Authentication verified, fetching user data...");
+        await fetchUserData();
+        
+        // Animate progress bars after data loads
+        setTimeout(() => {
+            const progressBars = document.querySelectorAll('.progress-fill');
+            progressBars.forEach(bar => {
+                const width = bar.style.width;
+                bar.style.width = '0%';
+                setTimeout(() => {
+                    bar.style.width = width;
+                }, 500);
+            });
+        }, 500);
+        
+    } catch (error) {
+        console.error("Dashboard initialization failed:", error);
+        hideLoadingSpinner();
+        showErrorMessage("Failed to initialize dashboard. Please refresh the page.");
+    }
+}
+    </script>
+
+    <style>
+        /* Loading spinner styles */
+        .loading-spinner {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(249, 250, 251, 0.9);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+        }
+
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid #e5e7eb;
+            border-top: 4px solid #3b82f6;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 1rem;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .loading-spinner p {
+            color: #6b7280;
+            font-size: 0.875rem;
+        }
+    </style>
+</body>
+</html>

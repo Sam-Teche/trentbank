@@ -1,0 +1,615 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Transaction Details</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+            position: relative;
+        }
+
+        .back-btn {
+            position: absolute;
+            left: 30px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(255,255,255,0.2);
+            border: none;
+            color: white;
+            padding: 10px 15px;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .back-btn:hover {
+            background: rgba(255,255,255,0.3);
+            transform: translateY(-50%) translateX(-2px);
+        }
+
+        .header h1 {
+            font-size: 28px;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        .header p {
+            opacity: 0.9;
+            font-size: 16px;
+        }
+
+        .transaction-summary {
+            padding: 40px;
+            text-align: center;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .amount-display {
+            font-size: 48px;
+            font-weight: 700;
+            margin-bottom: 10px;
+            color: #2c3e50;
+        }
+
+        .amount-display.debit {
+            color: #e74c3c;
+        }
+
+        .amount-display.credit {
+            color: #27ae60;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 8px 20px;
+            border-radius: 25px;
+            font-size: 14px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-top: 10px;
+        }
+
+        .status-pending {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .status-completed {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .status-failed {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .details-section {
+            padding: 40px;
+        }
+
+        .section-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 25px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .details-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+
+        .detail-card {
+            background: #f8f9fa;
+            padding: 25px;
+            border-radius: 15px;
+            border-left: 4px solid #3498db;
+        }
+
+        .detail-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .detail-row:last-child {
+            border-bottom: none;
+        }
+
+        .detail-label {
+            font-weight: 600;
+            color: #6c757d;
+            font-size: 14px;
+        }
+
+        .detail-value {
+            font-weight: 500;
+            color: #2c3e50;
+            text-align: right;
+            word-break: break-word;
+        }
+
+        .reference-code {
+            background: #e9ecef;
+            padding: 8px 12px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            letter-spacing: 1px;
+        }
+
+        .recipient-info {
+            background: linear-gradient(135deg, #74b9ff 0%, #0984e3 100%);
+            color: white;
+            border-left: 4px solid #0984e3;
+        }
+
+        .recipient-info .detail-label {
+            color: rgba(255,255,255,0.8);
+        }
+
+        .recipient-info .detail-value {
+            color: white;
+        }
+
+        .bank-info {
+            background: linear-gradient(135deg, #a29bfe 0%, #6c5ce7 100%);
+            color: white;
+            border-left: 4px solid #6c5ce7;
+        }
+
+        .bank-info .detail-label {
+            color: rgba(255,255,255,0.8);
+        }
+
+        .bank-info .detail-value {
+            color: white;
+        }
+
+        .fee-breakdown {
+            background: #fff5f5;
+            border-left: 4px solid #fc8181;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            padding: 30px 40px;
+            border-top: 1px solid #f0f0f0;
+        }
+
+        .btn {
+            padding: 12px 30px;
+            border-radius: 10px;
+            border: none;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+            color: white;
+        }
+
+        .btn-secondary {
+            background: #e9ecef;
+            color: #6c757d;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 40px;
+        }
+
+        .spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #3498db;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                margin: 10px;
+                border-radius: 15px;
+            }
+
+            .header {
+                padding: 20px;
+            }
+
+            .back-btn {
+                left: 20px;
+            }
+
+            .header h1 {
+                font-size: 24px;
+            }
+
+            .transaction-summary {
+                padding: 30px 20px;
+            }
+
+            .amount-display {
+                font-size: 36px;
+            }
+
+            .details-section {
+                padding: 30px 20px;
+            }
+
+            .details-grid {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+
+            .detail-card {
+                padding: 20px;
+            }
+
+            .action-buttons {
+                flex-direction: column;
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+            <p>Loading transaction details...</p>
+        </div>
+
+        <div id="transactionContent" style="display: none;">
+            <div class="header">
+                <a href="javascript:history.back()" class="back-btn">
+                    <i class="fas fa-arrow-left"></i>
+                    Back
+                </a>
+                <h1>Transaction Details</h1>
+                <p>Complete information about your transaction</p>
+            </div>
+
+            <div class="transaction-summary">
+                <div class="amount-display" id="transactionAmount">$0.00</div>
+                <div class="status-badge" id="transactionStatus">Pending</div>
+            </div>
+
+            <div class="details-section">
+                <div class="section-title">
+                    <i class="fas fa-info-circle"></i>
+                    Transaction Information
+                </div>
+                
+                <div class="details-grid">
+                    <div class="detail-card">
+                        <div class="detail-row">
+                            <span class="detail-label">Transaction ID</span>
+                            <span class="detail-value reference-code" id="transactionId">-</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">Reference</span>
+                            <span class="detail-value reference-code" id="transactionReference">-</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">Date & Time</span>
+                            <span class="detail-value" id="transactionDate">-</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">Type</span>
+                            <span class="detail-value" id="transactionType">-</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">Description</span>
+                            <span class="detail-value" id="transactionDescription">-</span>
+                        </div>
+                    </div>
+
+                    <div class="detail-card recipient-info" id="recipientCard" style="display: none;">
+                        <div class="detail-row">
+                            <span class="detail-label">Recipient Name</span>
+                            <span class="detail-value" id="recipientName">-</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">Recipient Email</span>
+                            <span class="detail-value" id="recipientEmail">-</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">Account Number</span>
+                            <span class="detail-value" id="recipientAccount">-</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">Account Type</span>
+                            <span class="detail-value" id="recipientAccountType">-</span>
+                        </div>
+                    </div>
+
+                    <div class="detail-card bank-info" id="bankCard" style="display: none;">
+                        <div class="detail-row">
+                            <span class="detail-label">Bank Name</span>
+                            <span class="detail-value" id="bankName">-</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">Routing Number</span>
+                            <span class="detail-value" id="routingNumber">-</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">Transfer Purpose</span>
+                            <span class="detail-value" id="transferPurpose">-</span>
+                        </div>
+                    </div>
+
+                    <div class="detail-card fee-breakdown" id="feeCard" style="display: none;">
+                        <div class="detail-row">
+                            <span class="detail-label">Transfer Amount</span>
+                            <span class="detail-value" id="transferAmount">-</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">Transfer Fee</span>
+                            <span class="detail-value" id="transferFee">-</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">Total Amount</span>
+                            <span class="detail-value" id="totalAmount">-</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="action-buttons">
+                <button class="btn btn-primary" onclick="downloadReceipt()">
+                    <i class="fas fa-download"></i>
+                    Download Receipt
+                </button>
+                <button class="btn btn-secondary" onclick="printReceipt()">
+                    <i class="fas fa-print"></i>
+                    Print
+                </button>
+            </div>
+        </div>
+    </div>
+    <script src="js/authManager.js"></script>
+    <script>
+        // Get transaction ID from URL parameters
+        function getTransactionId() {
+            const urlParams = new URLSearchParams(window.location.search);
+            return urlParams.get('id');
+        }
+
+        // Format currency
+        function formatCurrency(amount) {
+            return new Intl.NumberFormat('en-US', {
+                style: 'currency',
+                currency: 'USD'
+            }).format(amount);
+        }
+
+        // Format date
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            return date.toLocaleDateString('en-US', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+        }
+
+
+        // Add this function after formatDate()
+async function getAuthToken() {
+    try {
+        await authManager.initialize();
+        return authManager.getToken();
+    } catch (error) {
+        console.error("Failed to get auth token:", error);
+        return null;
+    }
+}
+
+        // Load transaction details
+        async function loadTransactionDetails() {
+    const transactionId = getTransactionId();
+    
+    if (!transactionId) {
+        alert('No transaction ID provided');
+        history.back();
+        return;
+    }
+
+    try {
+        const token = await getAuthToken();
+        
+        if (!token) {
+            console.error("No authentication token available");
+            authManager.logout();
+            return;
+        }
+
+        const response = await fetch(`${API_BASE_URL}/user/transaction/${transactionId}`, {
+            headers: {
+                'Authorization': `Bearer ${token}`
+            },
+            credentials: 'include'
+        });
+
+        if (response.status === 401) {
+            console.warn("Token expired, attempting refresh...");
+            const refreshed = await authManager.refreshToken();
+            if (refreshed) {
+                // Retry with new token
+                return loadTransactionDetails();
+            } else {
+                console.error("Token refresh failed");
+                authManager.logout();
+                return;
+            }
+        }
+
+        if (!response.ok) {
+            throw new Error('Failed to load transaction details');
+        }
+
+        const data = await response.json();
+        displayTransactionDetails(data.transaction);
+        
+    } catch (error) {
+        console.error('Error loading transaction:', error);
+        alert('Failed to load transaction details');
+        history.back();
+    }
+}
+        // Display transaction details
+        function displayTransactionDetails(transaction) {
+            // Hide loading, show content
+            document.getElementById('loading').style.display = 'none';
+            document.getElementById('transactionContent').style.display = 'block';
+
+            // Basic transaction info
+            const amountElement = document.getElementById('transactionAmount');
+            amountElement.textContent = formatCurrency(transaction.amount);
+            amountElement.className = `amount-display ${transaction.type}`;
+
+            const statusElement = document.getElementById('transactionStatus');
+            statusElement.textContent = transaction.status.charAt(0).toUpperCase() + transaction.status.slice(1);
+            statusElement.className = `status-badge status-${transaction.status}`;
+
+            document.getElementById('transactionId').textContent = transaction.id;
+            document.getElementById('transactionReference').textContent = transaction.reference || 'N/A';
+            document.getElementById('transactionDate').textContent = formatDate(transaction.date);
+            document.getElementById('transactionType').textContent = transaction.type.charAt(0).toUpperCase() + transaction.type.slice(1);
+            document.getElementById('transactionDescription').textContent = transaction.description;
+
+            // Show metadata if available (for transfers)
+            if (transaction.metadata && Object.keys(transaction.metadata).length > 0) {
+                const metadata = transaction.metadata;
+
+                // Recipient information
+                if (metadata.recipientName) {
+                    document.getElementById('recipientCard').style.display = 'block';
+                    document.getElementById('recipientName').textContent = metadata.recipientName || 'N/A';
+                    document.getElementById('recipientEmail').textContent = metadata.recipientEmail || 'N/A';
+                    document.getElementById('recipientAccount').textContent = `****${metadata.accountNumber}` || 'N/A';
+                    document.getElementById('recipientAccountType').textContent = metadata.accountType || 'N/A';
+                }
+
+                // Bank information
+                if (metadata.bankName) {
+                    document.getElementById('bankCard').style.display = 'block';
+                    document.getElementById('bankName').textContent = metadata.bankName || 'N/A';
+                    document.getElementById('routingNumber').textContent = metadata.routingNumber || 'N/A';
+                    document.getElementById('transferPurpose').textContent = metadata.transferPurpose || 'N/A';
+                }
+
+                // Fee breakdown
+                if (metadata.transferAmount) {
+                    document.getElementById('feeCard').style.display = 'block';
+                    document.getElementById('transferAmount').textContent = formatCurrency(metadata.transferAmount);
+                    document.getElementById('transferFee').textContent = formatCurrency(metadata.transferFee || 0);
+                    document.getElementById('totalAmount').textContent = formatCurrency(metadata.totalAmount || transaction.amount);
+                }
+            }
+        }
+
+        // Download receipt function
+        function downloadReceipt() {
+            window.print();
+        }
+
+        // Print receipt function
+        function printReceipt() {
+            window.print();
+        }
+
+        // Load transaction details when page loads
+        // REPLACE WITH THIS:
+document.addEventListener('DOMContentLoaded', async function() {
+    const isAuthenticated = await authManager.initialize();
+    
+    if (!isAuthenticated) {
+        console.warn("No valid session found, redirecting to login");
+        authManager.logout();
+        return;
+    }
+    
+    loadTransactionDetails();
+});
+
+        // Auto-refresh for pending transactions
+        function startAutoRefresh() {
+            const statusElement = document.getElementById('transactionStatus');
+            if (statusElement.textContent.toLowerCase() === 'pending') {
+                setInterval(() => {
+                    loadTransactionDetails();
+                }, 30000); // Refresh every 30 seconds for pending transactions
+            }
+        }
+
+        // Start auto-refresh after initial load
+        setTimeout(startAutoRefresh, 2000);
+    </script>
+</body>
+</html>

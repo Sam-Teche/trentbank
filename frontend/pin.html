@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Review Transfer & Enter PIN - Secure Money Transfer</title>
+    <link rel="stylesheet" href="styles/pin.css">
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="review-icon">📋</div>
+            <h1>Review Your Transfer</h1>
+            <p>Please review all details and enter your PIN to proceed</p>
+        </div>
+
+        <div class="content">
+            <!-- Personal Information -->
+            <div class="review-section">
+                <h3 class="section-title">
+                    👤 Personal Information
+                    <a href="transfermoney.html" class="edit-link">Edit</a>
+                </h3>
+                <div class="detail-grid">
+                    <div class="detail-row">
+                        <span class="detail-label">Full Name</span>
+                        <span class="detail-value" id="fullName">Loading...</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Email Address</span>
+                        <span class="detail-value" id="email">Loading...</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Banking Information -->
+            <div class="review-section">
+                <h3 class="section-title">
+                    🏦 Banking Information
+                    <a href="transfermoney.html" class="edit-link">Edit</a>
+                </h3>
+                <div class="detail-grid">
+                    <div class="detail-row">
+                        <span class="detail-label">Bank Name</span>
+                        <span class="detail-value" id="bankName">Loading...</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Account Type</span>
+                        <span class="detail-value" id="accountType">Loading...</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Account Number</span>
+                        <span class="detail-value" id="accountNumber">Loading...</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Routing Number</span>
+                        <span class="detail-value" id="routingNumber">Loading...</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Transfer Details -->
+            <div class="review-section">
+                <h3 class="section-title">
+                    💰 Transfer Details
+                    <a href="transfermoney.html" class="edit-link">Edit</a>
+                </h3>
+                <div class="detail-grid">
+                    <div class="detail-row">
+                        <span class="detail-label">Transfer Amount</span>
+                        <span class="detail-value amount-highlight" id="transferAmount">Loading...</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Transfer Fee</span>
+                        <span class="detail-value" id="transferFee">Loading...</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Processing Time</span>
+                        <span class="detail-value">1-3 Business Days</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Transfer Purpose</span>
+                        <span class="detail-value" id="transferPurpose">Loading...</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Total Amount -->
+            <div class="total-section">
+                <h3>Total Amount to be Transferred</h3>
+                <div class="total-amount" id="totalAmount">Loading...</div>
+                <p style="margin-top: 10px; font-size: 0.9rem; opacity: 0.9;">
+                    This amount will be debited from your account
+                </p>
+            </div>
+
+            <!-- PIN Entry Section -->
+            <div class="pin-section">
+                <h3>🔐 Enter Your 4-Digit PIN</h3>
+                <p class="pin-description">
+                    To ensure the security of your transfer, please enter your 4-digit PIN to authorize this transaction.
+                </p>
+                
+                <div class="pin-input-group">
+                    <input type="password" class="pin-digit" maxlength="1" id="pin1">
+                    <input type="password" class="pin-digit" maxlength="1" id="pin2">
+                    <input type="password" class="pin-digit" maxlength="1" id="pin3">
+                    <input type="password" class="pin-digit" maxlength="1" id="pin4">
+                </div>
+                
+                <div class="pin-error" id="pinError">Incorrect PIN. Please try again.</div>
+                
+                <p class="pin-help">
+                    Forgot your PIN? <a href="#" onclick="alert('Please contact support at 1-800-TRANSFER or visit your nearest branch')">Get Help</a>
+                </p>
+            </div>
+
+            <div class="security-notice">
+                🔒 Your PIN is encrypted and secure. We never store your PIN on our servers.
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="actions">
+                <a href="transfermoney.html" class="btn btn-back">
+                    ← Back to Edit
+                </a>
+                <button class="btn btn-confirm" id="confirmBtn" onclick="validateAndProceed()">
+                    🚀 Confirm Transfer
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/authManager.js"></script>
+<script>
+// Initialize session when page loads
+authManager.initialize().then(() => {
+    console.log('Session restored, token:', authManager.getToken());
+}).catch(err => {
+    console.log('No session found:', err);
+    // Redirect to login if no session
+    window.location.href = 'login.html';
+});
+</script>
+    
+    <script>
+        
+         document.addEventListener('DOMContentLoaded', () => {
+            const data = JSON.parse(sessionStorage.getItem('transferData'));
+            if (!data) {
+                alert('No transfer data found. Please fill out the transfer form first.');
+                window.location.href = 'transfermoney.html';
+                return;
+            }
+
+            // Fill in personal information - FIXED: Use correct element ID
+            const combinedFullName = `${data.firstName || ''} ${data.middleName || ''} ${data.lastName || ''}`.trim();
+            document.getElementById('fullName').textContent = combinedFullName || 'Not provided';
+            document.getElementById('email').textContent = data.email || 'Not provided';
+
+            // Fill in banking information
+            const bankOptions = {
+                'ally': 'Ally Bank',
+                'american_express': 'American Express Bank',
+                'arvest': 'Arvest Bank',
+                'associated': 'Associated Bank',
+                'bancorpsouth': 'BancorpSouth Bank',
+                'bank_of_america': 'Bank of America',
+                'bank_of_hawaii': 'Bank of Hawaii',
+                'bank_of_the_west': 'Bank of the West',
+                'bb_t': 'BB&T (Truist)',
+                'bmo_harris': 'BMO Harris Bank',
+                'bokf': 'BOK Financial',
+                'capital_one': 'Capital One',
+                'charles_schwab': 'Charles Schwab Bank',
+                'chase': 'Chase Bank (JPMorgan Chase)',
+                'citibank': 'Citibank',
+                'citizens': 'Citizens Bank',
+                'comerica': 'Comerica Bank',
+                'commerce': 'Commerce Bank',
+                'compass': 'BBVA USA (Compass Bank)',
+                'discover': 'Discover Bank',
+                'east_west': 'East West Bank',
+                'fifth_third': 'Fifth Third Bank',
+                'first_citizens': 'First Citizens Bank',
+                'first_horizon': 'First Horizon Bank',
+                'first_national': 'First National Bank',
+                'first_republic': 'First Republic Bank',
+                'flagstar': 'Flagstar Bank',
+                'frost': 'Frost Bank',
+                'fulton': 'Fulton Bank',
+                'goldman_sachs': 'Goldman Sachs Bank',
+                'great_western': 'Great Western Bank',
+                'hancock_whitney': 'Hancock Whitney Bank',
+                'hsbc': 'HSBC Bank USA',
+                'huntington': 'Huntington National Bank',
+                'iberia': 'Iberia Bank',
+                'key_bank': 'KeyBank',
+                'm_t': 'M&T Bank',
+                'morgan_stanley': 'Morgan Stanley Bank',
+                'navy_federal': 'Navy Federal Credit Union',
+                'northern_trust': 'Northern Trust',
+                'old_national': 'Old National Bank',
+                'park_national': 'Park National Bank',
+                'pinnacle': 'Pinnacle Financial Partners',
+                'pnc': 'PNC Bank',
+                'popular': 'Popular Bank',
+                'raymond_james': 'Raymond James Bank',
+                'regions': 'Regions Bank',
+                'santander': 'Santander Bank',
+                'signature': 'Signature Bank',
+                'state_street': 'State Street Bank',
+                'suntrust': 'SunTrust Bank (Truist)',
+                'synovus': 'Synovus Bank',
+                'td_bank': 'TD Bank',
+                'trustmark': 'Trustmark Bank',
+                'umb': 'UMB Bank',
+                'union_bank': 'Union Bank',
+                'us_bank': 'U.S. Bank',
+                'usaa': 'USAA Bank',
+                'valley_national': 'Valley National Bank',
+                'webster': 'Webster Bank',
+                'wells_fargo': 'Wells Fargo',
+                'western_alliance': 'Western Alliance Bank',
+                'whitney': 'Whitney Bank',
+                'zions': 'Zions Bank',
+                'other': 'Other'
+            };
+            
+            const accountTypeOptions = {
+                'checking': 'Checking Account',
+                'savings': 'Savings Account'
+            };
+
+            document.getElementById('bankName').textContent = bankOptions[data.bankName] || data.bankName || 'Not selected';
+            document.getElementById('accountType').textContent = accountTypeOptions[data.accountType] || data.accountType || 'Not selected';
+            document.getElementById('routingNumber').textContent = data.routingNumber || 'Not provided';
+            
+            // Mask account number (show only last 4 digits)
+            if (data.accountNumber) {
+                const maskedAccount = '****' + data.accountNumber.slice(-4);
+                document.getElementById('accountNumber').textContent = maskedAccount;
+            } else {
+                document.getElementById('accountNumber').textContent = 'Not provided';
+            }
+
+            // Fill in transfer details
+            const transferPurposeOptions = {
+                'personal': 'Personal Transfer',
+                'business': 'Business Payment',
+                'family': 'Family Support',
+                'education': 'Education',
+                'investment': 'Investment',
+                'other': 'Other'
+            };
+
+            if (data.transferAmount) {
+                const amount = parseFloat(data.transferAmount);
+                const fee = amount * 0.006; // 0.6% fee
+                const total = amount + fee;
+
+                document.getElementById('transferAmount').textContent = `$${amount.toFixed(2)}`;
+                document.getElementById('transferFee').textContent = `$${fee.toFixed(2)}`;
+                document.getElementById('totalAmount').textContent = `$${total.toFixed(2)}`;
+            } else {
+                document.getElementById('transferAmount').textContent = 'Not provided';
+                document.getElementById('transferFee').textContent = '$0.00';
+                document.getElementById('totalAmount').textContent = '$0.00';
+            }
+
+            document.getElementById('transferPurpose').textContent = transferPurposeOptions[data.transferPurpose] || data.transferPurpose || 'Not specified';
+        });
+
+
+        // Function to wait for authManager
+        function waitForAuthManager(callback) {
+            if (typeof authManager !== 'undefined' && authManager) {
+                callback();
+            } else {
+                console.log('Waiting for authManager...');
+                setTimeout(() => waitForAuthManager(callback), 100);
+            }
+        }
+
+        // Initialize everything after authManager is ready
+        waitForAuthManager(() => {
+            console.log('authManager ready!', authManager);
+            
+            document.addEventListener('DOMContentLoaded', () => {
+                // Your existing DOMContentLoaded code here
+                const data = JSON.parse(sessionStorage.getItem('transferData'));
+                if (!data) {
+                    alert('No transfer data found. Please fill out the transfer form first.');
+                    window.location.href = 'transfermoney.html';
+                    return;
+                }
+                // ... rest of your initialization code
+            });
+        });
+
+
+        // PIN input functionality
+        const pinInputs = document.querySelectorAll('.pin-digit');
+        
+        pinInputs.forEach((input, index) => {
+            input.addEventListener('input', (e) => {
+                // Only allow numbers
+                e.target.value = e.target.value.replace(/\D/g, '');
+                
+                // Move to next input if current is filled
+                if (e.target.value && index < pinInputs.length - 1) {
+                    pinInputs[index + 1].focus();
+                }
+            });
+
+            input.addEventListener('keydown', (e) => {
+                // Move to previous input on backspace if current is empty
+                if (e.key === 'Backspace' && !e.target.value && index > 0) {
+                    pinInputs[index - 1].focus();
+                }
+            });
+        });
+
+        // Updated validateAndProceed function for the PIN page
+async function validateAndProceed() {
+    const pin = Array.from(pinInputs).map(input => input.value).join('');
+    const pinError = document.getElementById('pinError');
+    const confirmBtn = document.getElementById('confirmBtn');
+
+    if (pin.length !== 4) {
+        pinError.style.display = 'block';
+        pinError.textContent = 'Please enter a complete 4-digit PIN';
+        pinInputs.forEach(input => input.classList.add('error'));
+        return;
+    }
+
+    // Check if PIN is 1234
+    if (pin !== '1234') {
+        pinError.style.display = 'block';
+        pinError.textContent = 'Incorrect PIN. Please try again. (you can only try 3 times.)';
+        pinInputs.forEach(input => {
+            input.classList.add('error');
+            input.value = '';
+        });
+        pinInputs[0].focus();
+        return;
+    }
+
+    // Hide error if validation passes
+    pinError.style.display = 'none';
+    pinInputs.forEach(input => input.classList.remove('error'));
+
+    // Show processing state
+    confirmBtn.innerHTML = '⏳ Authorizing...';
+    confirmBtn.disabled = true;
+
+    try {
+
+        // Check if authManager is available
+        if (typeof authManager === 'undefined') {
+            throw new Error('Authentication system not ready. Please refresh the page.');
+        }
+
+        // Get transfer data from sessionStorage
+        const transferData = JSON.parse(sessionStorage.getItem('transferData'));
+        
+        if (!transferData) {
+            throw new Error('Transfer data not found');
+        }
+
+        // Calculate fee and total
+        const amount = parseFloat(transferData.transferAmount);
+        const fee = amount * 0.006;
+        
+        // Prepare data for backend
+        const transactionData = {
+            recipientName: `${transferData.firstName || ''} ${transferData.middleName || ''} ${transferData.lastName || ''}`.trim(),
+            email: transferData.email,
+            bankName: transferData.bankName,
+            accountType: transferData.accountType,
+            accountNumber: transferData.accountNumber,
+            routingNumber: transferData.routingNumber,
+            transferAmount: amount,
+            transferPurpose: transferData.transferPurpose,
+            transferFee: fee
+        };
+
+
+         // Get token safely
+         const token = authManager.getToken();
+        if (!token) {
+            throw new Error('Not authenticated. Please log in again.');
+        }
+
+
+        // Send to backend
+        const response = await fetch(`${API_BASE_URL}/user/transfer`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
+            credentials: 'include',
+            body: JSON.stringify(transactionData)
+        });
+
+        const result = await response.json();
+
+        if (!response.ok) {
+            throw new Error(result.message || 'Transfer failed');
+        }
+
+        // Store transaction ID for the pending page
+        sessionStorage.setItem('transactionId', result.transaction.id);
+        sessionStorage.setItem('transactionReference', result.transaction.reference);
+        
+        // Redirect to pending page
+        window.location.href = 'pending.html';
+
+    } catch (error) {
+        console.error('Transfer error:', error);
+        pinError.style.display = 'block';
+        pinError.textContent = error.message || 'Transfer failed. Please try again.';
+        
+        // Reset button
+        confirmBtn.innerHTML = '🚀 Confirm Transfer';
+        confirmBtn.disabled = false;
+    }
+}
+    </script>
+</body>
+</html>

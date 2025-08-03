@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Login - Trent Bank</title>
+    <link rel="stylesheet" href="styles/login.css" />
+  </head>
+  <body>
+    <div class="login-container">
+      <div class="logo">
+        <h1>Trent Bank</h1>
+        <p>Welcome back! Please sign in to your account</p>
+      </div>
+
+      <div id="successMessage" class="message success-message"></div>
+      <div id="errorMessage" class="message error-message"></div>
+
+      <form id="loginForm">
+        <div class="form-group">
+          <label for="username">Username or Email</label>
+          <input
+            type="text"
+            id="username"
+            name="username"
+            placeholder="Enter your username or email"
+            required
+          />
+        </div>
+
+        <div class="form-group">
+          <label for="password">Password</label>
+          <div class="input-wrapper">
+            <input
+              type="password"
+              id="password"
+              name="password"
+              placeholder="Enter your password"
+              required
+            />
+            <span class="password-toggle" onclick="togglePassword()">👁️</span>
+          </div>
+        </div>
+
+        <div class="forgot-password">
+          <a href="#" onclick="openForgotModal()">Forgot your password?</a>
+        </div>
+
+        <button type="submit" class="login-btn" id="loginBtn">Sign In</button>
+      </form>
+
+      <div class="divider">
+        <span>or</span>
+      </div>
+
+      <div class="signup-link">
+        Don't have an account?
+        <a href="signup.html" onclick="openSignupModal()">Sign up here</a>
+      </div>
+    </div>
+
+    <!-- Forgot Password Modal -->
+    <div id="forgotModal" class="modal">
+      <div class="modal-content">
+        <span class="close" onclick="closeForgotModal()">&times;</span>
+        <h2>Reset Password</h2>
+        <p>
+          Enter your email address and we'll send you a link to reset your
+          password.
+        </p>
+
+        <form id="forgotForm">
+          <div class="form-group">
+            <label for="resetEmail">Email Address</label>
+            <input
+              type="email"
+              id="resetEmail"
+              name="resetEmail"
+              placeholder="Enter your email address"
+              required
+            />
+          </div>
+          <button type="submit" class="reset-btn">Send Reset Link</button>
+        </form>
+      </div>
+    </div>
+
+    <script src="js/authManager.js"></script>
+    <script>
+    // Password visibility toggle
+function togglePassword() {
+  const passwordField = document.getElementById("password");
+  const toggleIcon = document.querySelector(".password-toggle");
+
+  if (passwordField.type === "password") {
+    passwordField.type = "text";
+    toggleIcon.textContent = "🙈";
+  } else {
+    passwordField.type = "password";
+    toggleIcon.textContent = "👁️";
+  }
+}
+
+// Modal functions
+function openForgotModal() {
+  document.getElementById("forgotModal").style.display = "block";
+}
+
+function closeForgotModal() {
+  document.getElementById("forgotModal").style.display = "none";
+  document.getElementById("forgotForm").reset();
+}
+
+function openSignupModal() {
+  window.location.href = "signup.html";
+}
+
+// Close modal when clicking outside
+window.onclick = function (event) {
+  const modal = document.getElementById("forgotModal");
+  if (event.target === modal) {
+    closeForgotModal();
+  }
+};
+
+// Show message function
+function showMessage(message, type = "success") {
+  const successDiv = document.getElementById("successMessage");
+  const errorDiv = document.getElementById("errorMessage");
+
+  successDiv.style.display = "none";
+  errorDiv.style.display = "none";
+
+  if (type === "success") {
+    successDiv.textContent = message;
+    successDiv.style.display = "block";
+  } else {
+    errorDiv.textContent = message;
+    errorDiv.style.display = "block";
+  }
+
+  setTimeout(() => {
+    successDiv.style.display = "none";
+    errorDiv.style.display = "none";
+  }, 5000);
+}
+
+// ============ SECURE LOGIN FORM SUBMISSION ============
+document
+  .getElementById("loginForm")
+  .addEventListener("submit", async function (e) {
+    e.preventDefault();
+
+    const username = document.getElementById("username").value.trim();
+    const password = document.getElementById("password").value;
+    const loginBtn = document.getElementById("loginBtn");
+
+    if (!username || !password) {
+      showMessage("Please fill in all fields.", "error");
+      return;
+    }
+
+    loginBtn.classList.add("loading");
+    const originalText = loginBtn.textContent;
+    loginBtn.textContent = "";
+
+    try {
+      const response = await fetch(`${API_BASE_URL}/auth/login`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+        body: JSON.stringify({
+          username: username,
+          password,
+        }),
+      });
+
+      const data = await response.json();
+      console.log("Login response:", data);
+
+      if (response.ok) {
+        // ✅ SECURE: Store token in memory only
+        authManager.setToken(data.token, data.user);
+
+        showMessage(`Welcome back, ${data.user.firstName}!`, "success");
+
+        // Redirect immediately without delay to prevent memory issues
+        window.location.href = "homepageee.html";
+      } else {
+        showMessage(
+          data.message || "Login failed. Please try again.",
+          "error"
+        );
+      }
+    } catch (error) {
+      console.error("Login error:", error);
+      showMessage(
+        "Network error. Please check your connection and try again.",
+        "error"
+      );
+    } finally {
+      loginBtn.classList.remove("loading");
+      loginBtn.textContent = originalText;
+    }
+  });
+
+// Forgot password form submission
+document
+  .getElementById("forgotForm")
+  .addEventListener("submit", async function (e) {
+    e.preventDefault();
+
+    const email = document.getElementById("resetEmail").value.trim();
+    const resetBtn = e.target.querySelector(".reset-btn");
+
+    if (!email) {
+      showMessage("Please enter your email address.", "error");
+      return;
+    }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      showMessage("Please enter a valid email address.", "error");
+      return;
+    }
+
+    resetBtn.textContent = "Sending...";
+    resetBtn.style.opacity = "0.7";
+
+    try {
+      const response = await fetch(`${API_BASE_URL}/auth/forgot-password`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ email }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        showMessage(
+          "Password reset link has been sent to your email.",
+          "success"
+        );
+        closeForgotModal();
+      } else {
+        showMessage(
+          data.message || "Failed to send reset link. Please try again.",
+          "error"
+        );
+      }
+    } catch (error) {
+      console.error("Forgot password error:", error);
+      showMessage("Network error. Please try again.", "error");
+    } finally {
+      resetBtn.textContent = "Send Reset Link";
+      resetBtn.style.opacity = "1";
+    }
+  });
+
+// Input focus effects
+document.querySelectorAll("input").forEach((input) => {
+  input.addEventListener("focus", function () {
+    this.parentElement.style.transform = "scale(1.02)";
+  });
+
+  input.addEventListener("blur", function () {
+    this.parentElement.style.transform = "scale(1)";
+  });
+});
+
+// ============ SECURE PAGE LOAD CHECK ============
+window.addEventListener("load", async function () {
+  // Only run session check if NOT on login page
+  if (window.location.pathname.includes('login.html') || 
+      window.location.pathname === '/login.html' ||
+      window.location.pathname === '/') {
+    console.log("On login page, skipping session check");
+    const hasSession = await authManager.initialize();
+  if (hasSession) {
+    console.log("Session active, redirecting to homepageee.html");
+    window.location.href = "homepageee.html";
+  }
+    return;
+  }
+
+  console.log("Checking for existing session...");
+  
+  try {
+    const hasSession = await authManager.initialize();
+    
+    if (hasSession) {
+      console.log("Valid session found, user already logged in");
+      // User is already authenticated, could redirect to dashboard
+      if (window.location.pathname.includes('login.html')) {
+        window.location.href = "homepageee.html";
+      }
+    }
+  } catch (error) {
+    console.error("Session check failed:", error);
+    // Don't redirect on error, let user try to login
+  }
+});
+
+// ============ UTILITY FUNCTIONS ============
+
+// Updated utility function to get auth token
+async function getAuthToken() {
+  await authManager.initialize();
+  return authManager.getToken();
+}
+
+// Updated utility function to clear authentication data
+function clearAuth() {
+  authManager.logout();
+}
+
+// Secure function to make authenticated API calls
+async function makeAuthenticatedRequest(url, options = {}) {
+  await authManager.initialize();
+  const token = authManager.getToken();
+  
+  if (!token) {
+    console.error("No token available for authenticated request");
+    authManager.logout();
+    return null;
+  }
+
+  const authOptions = {
+    ...options,
+    headers: {
+      ...options.headers,
+      'Authorization': `Bearer ${token}`,
+      'Content-Type': 'application/json'
+    },
+    credentials: "include"
+  };
+
+  try {
+    const response = await fetch(url, authOptions);
+    
+    if (response.status === 401) {
+      console.warn("Token expired, attempting refresh...");
+      const refreshSuccess = await authManager.refreshToken();
+      if (refreshSuccess) {
+        authOptions.headers.Authorization = `Bearer ${authManager.getToken()}`;
+        return await fetch(url, authOptions);
+      } else {
+        return null;
+      }
+    }
+    
+    return response;
+  } catch (error) {
+    console.error("Authenticated request failed:", error);
+    throw error;
+  }
+}
+
+// Debug function
+function debugAuth() {
+  console.log("=== Secure Auth Debug Info ===");
+  console.log("Authenticated:", authManager.isAuthenticated());
+  console.log("Initialized:", authManager.isInitialized);
+  console.log("Token exists:", !!authManager.getToken());
+  console.log("User:", authManager.getUser() ? authManager.getUser().username : "null");
+  console.log("==============================");
+}
+  </script>
+  </body>
+</html>

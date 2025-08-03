@@ -1,0 +1,1301 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TrentBank - Open Your Personal Account</title>
+    <link rel="stylesheet" href="styles/newhomepage.css"> 
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="logo">
+                <h1>TrentBank</h1>
+                <p>Your trusted partner in personal banking since 1987</p>
+            </div>
+        </div>
+
+        <div class="form-container">
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill"></div>
+            </div>
+
+            <div class="success-message" id="successMessage">
+                <strong>Success!</strong> Your information has been saved. Continue to the next step.
+            </div>
+
+            <form id="signupForm" novalidate>
+                <!-- Step 1: Account Type -->
+                <div class="step active" id="step1">
+                    <h2 class="step-title">Choose Your Account Type</h2>
+                    <p class="step-description">Select the personal banking account that best fits your needs.</p>
+                    
+                    <div class="form-group" id="accountTypeGroup">
+                        <div class="account-types">
+                            <label class="account-type" for="checking">
+                                <input type="radio" name="accountType" value="checking" id="checking" required>
+                                <h4>Personal Checking</h4>
+                                <p>Perfect for everyday banking with easy access to your money.</p>
+                                <ul class="features">
+                                    <li>No minimum balance</li>
+                                    <li>Free online banking</li>
+                                    <li>Free debit card</li>
+                                    <li>Mobile check deposit</li>
+                                </ul>
+                            </label>
+                            
+                            <label class="account-type" for="savings">
+                                <input type="radio" name="accountType" value="savings" id="savings" required>
+                                <h4>High-Yield Savings</h4>
+                                <p>Grow your money with competitive interest rates.</p>
+                                <ul class="features">
+                                    <li>2.5% APY</li>
+                                    <li>No monthly fees</li>
+                                    <li>FDIC insured</li>
+                                    <li>Online account management</li>
+                                </ul>
+                            </label>
+                            
+                            <label class="account-type" for="premium">
+                                <input type="radio" name="accountType" value="premium" id="premium" required>
+                                <h4>Premium Banking</h4>
+                                <p>Exclusive benefits and premium services for sophisticated banking.</p>
+                                <ul class="features">
+                                    <li>Dedicated relationship manager</li>
+                                    <li>Priority customer service</li>
+                                    <li>Investment advisory services</li>
+                                    <li>Premium rewards program</li>
+                                </ul>
+                            </label>
+                        </div>
+                        <div class="error" id="accountTypeError">Please select an account type to continue</div>
+                    </div>
+
+                    <div class="step-success-message" id="stepSuccessMessage">
+                        Account type selected successfully!
+                    </div>
+                </div>
+
+                <!-- Step 2: Personal Information -->
+                <div class="step" id="step2">
+                    <h2 class="step-title">Personal Information</h2>
+                    <p class="step-description">Tell us about yourself. This information is required by federal law.</p>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="firstName" class="required">First Name</label>
+                            <input type="text" id="firstName" name="firstName" required>
+                            <div class="error">Please enter your first name</div>
+                        </div>
+                        <div class="form-group">
+                            <label for="lastName" class="required">Last Name</label>
+                            <input type="text" id="lastName" name="lastName" required>
+                            <div class="error">Please enter your last name</div>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="dateOfBirth" class="required">Date of Birth</label>
+                            <input type="date" id="dateOfBirth" name="dateOfBirth" required>
+                            <div class="error">You must be at least 18 years old</div>
+                        </div>
+                        <div class="form-group">
+                            <label for="ssn" class="required">Social Security Number 
+                                <span class="tooltip">ⓘ
+                                    <span class="tooltiptext">Required for identity verification and regulatory compliance</span>
+                                </span>
+                            </label>
+                            <input type="password" id="ssn" name="ssn" placeholder="XXX-XX-XXXX" maxlength="11" required>
+                            <div class="error">Please enter a valid SSN</div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="email" class="required">Email Address</label>
+                        <div class="input-group">
+                            <input type="email" id="email" name="email" required>
+                            <span class="input-icon">📧</span>
+                        </div>
+                        <div class="error">Please enter a valid email address</div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="phone" class="required">Phone Number</label>
+                            <input type="tel" id="phone" name="phone" placeholder="(555) 123-4567" required>
+                            <div class="error">Please enter a valid phone number</div>
+                        </div>
+                        <div class="form-group">
+                            <label for="phoneType">Phone Type</label>
+                            <select id="phoneType" name="phoneType">
+                                <option value="mobile">Mobile</option>
+                                <option value="home">Home</option>
+                                <option value="work">Work</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Step 3: Address Information -->
+                <div class="step" id="step3">
+                    <h2 class="step-title">Address Information</h2>
+                    <p class="step-description">Please provide your current residential address.</p>
+                    
+                    <div class="form-group">
+                        <label for="address1" class="required">Street Address</label>
+                        <input type="text" id="address1" name="address1" placeholder="123 Main St" required>
+                        <div class="error">Please enter your street address</div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="address2">Apt, Suite, or Building (Optional)</label>
+                        <input type="text" id="address2" name="address2" placeholder="Apt 4B">
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="city" class="required">City</label>
+                            <input type="text" id="city" name="city" required>
+                            <div class="error">Please enter your city</div>
+                        </div>
+                        <div class="form-group">
+                            <label for="state" class="required">State</label>
+                            <select id="state" name="state" required>
+                                <option value="">Select State</option>
+                                <option value="AL">Alabama</option>
+                                <option value="AK">Alaska</option>
+                                <option value="AZ">Arizona</option>
+                                <option value="AR">Arkansas</option>
+                                <option value="CA">California</option>
+                                <option value="CO">Colorado</option>
+                                <option value="CT">Connecticut</option>
+                                <option value="DE">Delaware</option>
+                                <option value="FL">Florida</option>
+                                <option value="GA">Georgia</option>
+                                <option value="HI">Hawaii</option>
+                                <option value="ID">Idaho</option>
+                                <option value="IL">Illinois</option>
+                                <option value="IN">Indiana</option>
+                                <option value="IA">Iowa</option>
+                                <option value="KS">Kansas</option>
+                                <option value="KY">Kentucky</option>
+                                <option value="LA">Louisiana</option>
+                                <option value="ME">Maine</option>
+                                <option value="MD">Maryland</option>
+                                <option value="MA">Massachusetts</option>
+                                <option value="MI">Michigan</option>
+                                <option value="MN">Minnesota</option>
+                                <option value="MS">Mississippi</option>
+                                <option value="MO">Missouri</option>
+                                <option value="MT">Montana</option>
+                                <option value="NE">Nebraska</option>
+                                <option value="NV">Nevada</option>
+                                <option value="NH">New Hampshire</option>
+                                <option value="NJ">New Jersey</option>
+                                <option value="NM">New Mexico</option>
+                                <option value="NY">New York</option>
+                                <option value="NC">North Carolina</option>
+                                <option value="ND">North Dakota</option>
+                                <option value="OH">Ohio</option>
+                                <option value="OK">Oklahoma</option>
+                                <option value="OR">Oregon</option>
+                                <option value="PA">Pennsylvania</option>
+                                <option value="RI">Rhode Island</option>
+                                <option value="SC">South Carolina</option>
+                                <option value="SD">South Dakota</option>
+                                <option value="TN">Tennessee</option>
+                                <option value="TX">Texas</option>
+                                <option value="UT">Utah</option>
+                                <option value="VT">Vermont</option>
+                                <option value="VA">Virginia</option>
+                                <option value="WA">Washington</option>
+                                <option value="WV">West Virginia</option>
+                                <option value="WI">Wisconsin</option>
+                                <option value="WY">Wyoming</option>
+                            </select>
+                            <div class="error">Please select your state</div>
+                        </div>
+                        <div class="form-group">
+                            <label for="zip" class="required">ZIP Code</label>
+                            <input type="text" id="zip" name="zip" pattern="\d{5}(-\d{4})?" required>
+                            <div class="error">Please enter a valid ZIP code</div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="yearsAtAddress">How long have you lived at this address?</label>
+                        <select id="yearsAtAddress" name="yearsAtAddress">
+                            <option value="<1">Less than 1 year</option>
+                            <option value="1-3">1-3 years</option>
+                            <option value="3-5">3-5 years</option>
+                            <option value="5-10">5-10 years</option>
+                            <option value="10+">More than 10 years</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Step 4: Financial Information -->
+                <div class="step" id="step4">
+                    <h2 class="step-title">Financial Information</h2>
+                    <p class="step-description">Help us understand your financial situation to provide the best services.</p>
+                    
+                    <div class="form-group">
+                        <label for="employmentStatus" class="required">Employment Status</label>
+                        <select id="employmentStatus" name="employmentStatus" required>
+                            <option value="">Select Employment Status</option>
+                            <option value="employed">Employed</option>
+                            <option value="self-employed">Self-Employed</option>
+                            <option value="unemployed">Unemployed</option>
+                            <option value="student">Student</option>
+                            <option value="retired">Retired</option>
+                            <option value="disabled">Disabled</option>
+                        </select>
+                        <div class="error">Please select your employment status</div>
+                    </div>
+
+                    <div class="form-group hidden" id="employerGroup">
+                        <label for="employer">Employer Name</label>
+                        <input type="text" id="employer" name="employer">
+                    </div>
+
+                    <div class="form-group hidden" id="occupationGroup">
+                        <label for="occupation">Occupation</label>
+                        <input type="text" id="occupation" name="occupation">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="annualIncome" class="required">Estimated Annual Income</label>
+                        <select id="annualIncome" name="annualIncome" required>
+                            <option value="">Select Income Range</option>
+                            <option value="<25k">Less than $25,000</option>
+                            <option value="25k-50k">$25,000 - $50,000</option>
+                            <option value="50k-75k">$50,000 - $75,000</option>
+                            <option value="75k-100k">$75,000 - $100,000</option>
+                            <option value="100k-150k">$100,000 - $150,000</option>
+                            <option value="150k+">More than $150,000</option>
+                        </select>
+                        <div class="error">Please select your income range</div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="sourceOfFunds" class="required">Primary Source of Funds</label>
+                        <select id="sourceOfFunds" name="sourceOfFunds" required>
+                            <option value="">Select Source</option>
+                            <option value="employment">Employment Income</option>
+                            <option value="investments">Investments</option>
+                            <option value="inheritance">Inheritance</option>
+                            <option value="savings">Personal Savings</option>
+                            <option value="family">Family Support</option>
+                            <option value="other">Other</option>
+                        </select>
+                        <div class="error">Please select your primary source of funds</div>
+                    </div>
+                </div>
+
+                <!-- Step 5: Account Setup -->
+                <div class="step" id="step5">
+                    <h2 class="step-title">Account Setup</h2>
+                    <p class="step-description">Create your online banking credentials and security settings.</p>
+                    
+                    <div class="form-group">
+                        <label for="username" class="required">Username</label>
+                        <div class="input-group">
+                            <input placeholder="Username must be 6-20 characters (letters and numbers only)" type="text" id="username" name="username" required>
+                            <span class="input-icon">👤</span>
+                        </div>
+                        <div class="error">Username must be 6-20 characters (letters and numbers only)</div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="password" class="required">Password</label>
+                            <div class="input-group">
+                                <input placeholder="Password must be at least 8 characters with uppercase, lowercase, and number" type="password" id="password" name="password" required>
+                                <span class="input-icon">🔒</span>
+                            </div>
+                            <div class="password-strength">
+                                <div class="strength-meter">
+                                    <div class="strength-fill" id="passwordStrength"></div>
+                                </div>
+                                <span id="passwordStrengthText">Password strength</span>
+                            </div>
+                            <div class="error">Password must be at least 8 characters with uppercase, lowercase, and number</div>
+                        </div>
+                        <div class="form-group">
+                            <label for="confirmPassword" class="required">Confirm Password</label>
+                            <div class="input-group">
+                                <input type="password" id="confirmPassword" name="confirmPassword" required>
+                                <span class="input-icon">🔒</span>
+                            </div>
+                            <div class="error">Passwords do not match</div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="securityQuestion" class="required">Security Question</label>
+                        <select id="securityQuestion" name="securityQuestion" required>
+                            <option value="">Select a security question</option>
+                            <option value="motherMaidenName">What is your mother's maiden name?</option>
+                            <option value="petName">What was the name of your first pet?</option>
+                            <option value="birthCity">In what city were you born?</option>
+                            <option value="highSchool">What high school did you attend?</option>
+                            <option value="firstCar">What was the make of your first car?</option>
+                        </select>
+                        <div class="error">Please select a security question</div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="securityAnswer" class="required">Security Answer</label>
+                        <input type="text" id="securityAnswer" name="securityAnswer" required>
+                        <div class="error">Please provide an answer to your security question</div>
+                    </div>
+
+                    <div class="security-features">
+                        <h3>🔒 Your Security is Our Priority</h3>
+                        <ul>
+                            <li>256-bit encryption for all transactions</li>
+                            <li>Multi-factor authentication options</li>
+                            <li>Real-time fraud monitoring</li>
+                            <li>FDIC insured up to $250,000</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Step 6: Review & Submit -->
+                <div class="step" id="step6">
+                    <h2 class="step-title">Review Your Information</h2>
+                    <p class="step-description">Please verify all information is correct before submitting your application.</p>
+                    
+                    <div class="form-group">
+                        <h4>Account Type</h4>
+                        <p id="reviewAccountType"></p>
+                    </div>
+
+                    <div class="form-group">
+                        <h4>Personal Information</h4>
+                        <p id="reviewPersonalInfo"></p>
+                    </div>
+
+                    <div class="form-group">
+                        <h4>Address</h4>
+                        <p id="reviewAddress"></p>
+                    </div>
+
+                    <div class="form-group">
+                        <h4>Financial Information</h4>
+                        <p id="reviewFinancialInfo"></p>
+                    </div>
+
+                    <div class="form-group">
+                        <h4>Account Credentials</h4>
+                        <p id="reviewCredentials"></p>
+                    </div>
+
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="termsAgreement" name="termsAgreement" required>
+                        <label for="termsAgreement">I agree to the <a href="#">Terms and Conditions</a> and <a href="#">Privacy Policy</a> of TrentBank. I confirm that all information provided is accurate and complete.</label>
+                    </div>
+                    <div class="error" id="termsError">You must agree to the terms and conditions</div>
+
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="electronicConsent" name="electronicConsent" required>
+                        <label for="electronicConsent">I consent to receive all communications and disclosures electronically.</label>
+                    </div>
+                    <div class="error" id="consentError">You must consent to electronic communications</div>
+                </div>
+
+                <!-- Step 7: Confirmation -->
+                <div class="step" id="step7">
+                    <h2 class="step-title">Application Submitted Successfully!</h2>
+                    <p class="step-description">Thank you for choosing TrentBank. Your account application is being processed.</p>
+                    
+                    <div style="text-align: center; margin: 40px 0;">
+                        <svg width="80" height="80" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="color: #10b981;">
+                            <path d="M12 2C6.48 2 2 6.48 2 12C2 17.52 6.48 22 12 22C17.52 22 22 17.52 22 12C22 6.48 17.52 2 12 2ZM10 17L5 12L6.41 10.59L10 14.17L17.59 6.58L19 8L10 17Z" fill="currentColor"/>
+                        </svg>
+                        <h3 style="margin: 20px 0 10px; color: #1e293b;">Your application #TB-<span id="applicationNumber"></span> has been received</h3>
+                        <p style="color: #64748b; margin-bottom: 30px;">We'll send a confirmation email to <span id="confirmationEmail" style="font-weight: 600;"></span> with next steps.</p>
+                    </div>
+
+                    <div class="security-features">
+                        <h3>📱 What's Next?</h3>
+                        <ul>
+                            <li>Check your email for verification instructions</li>
+                            <li>Download our mobile app to track your application status</li>
+                            <li>Expect a call from our account specialist within 24 hours</li>
+                            <li>Fund your new account to activate all features</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="btn-group">
+                    <button type="button" class="btn btn-secondary" id="prevBtn" disabled>Back</button>
+                    <button type="button" class="btn" id="nextBtn">Next</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+
+    <script>
+
+const API_CONFIG = {
+  // Change this to my deployed backend URL
+  BASE_URL: 'https://trentbank.onrender.com/api',
+  // For local development, use: 'http://localhost:3001/api'
+};
+        document.addEventListener('DOMContentLoaded', function() {
+    // Form navigation and validation
+    const form = document.getElementById('signupForm');
+    const steps = document.querySelectorAll('.step');
+    const prevBtn = document.getElementById('prevBtn');
+    const nextBtn = document.getElementById('nextBtn');
+    const progressFill = document.getElementById('progressFill');
+    const successMessage = document.getElementById('successMessage');
+    let currentStep = 0;
+    const totalSteps = steps.length;
+
+    // Prevent form submission on Enter key
+    form.addEventListener('submit', function(e) {
+        e.preventDefault();
+        return false;
+    });
+
+    // Prevent Enter key from submitting form
+    form.addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            return false;
+        }
+    });
+
+    // Initialize form
+    setupAccountTypeSelection();
+    showStep(currentStep);
+
+    // Next button click handler
+    // Updated Next button click handler
+nextBtn.addEventListener('click', function() {
+    console.log('Next button clicked, current step:', currentStep);
+    
+    if (currentStep < totalSteps - 2) {
+        // Normal step progression (steps 0-5)
+        if (validateStep(currentStep)) {
+            currentStep++;
+            showStep(currentStep);
+            updateProgress();
+            showSuccessMessage();
+        } else {
+            // Validation failed - ensure current step remains active and visible
+            console.log('Validation failed, keeping step active');
+            
+            // Force the current step to stay active
+            steps[currentStep].classList.add('active');
+            
+            // Ensure all form elements in the current step are visible
+            const currentStepElement = steps[currentStep];
+            currentStepElement.querySelectorAll('.form-group, .checkbox-group').forEach(group => {
+                group.style.display = 'block';
+                group.style.visibility = 'visible';
+                group.style.opacity = '1';
+            });
+            
+            currentStepElement.querySelectorAll('input, select, textarea').forEach(input => {
+                input.style.display = 'block';
+                input.style.visibility = 'visible';
+                input.style.opacity = '1';
+            });
+            
+            // Special handling for radio buttons and checkboxes
+            currentStepElement.querySelectorAll('input[type="radio"], input[type="checkbox"]').forEach(input => {
+                input.style.display = 'inline-block';
+            });
+        }
+    } else if (currentStep === totalSteps - 2) {
+        // On the review step (step 5), validate and move to final step
+        if (validateStep(currentStep)) {
+            reviewFormData();
+            currentStep++;
+            showStep(currentStep);
+            updateProgress();
+            submitForm(); // Auto-submit on reaching final step
+        } else {
+            // Validation failed on review step - keep it active
+            console.log('Review step validation failed, keeping step active');
+            steps[currentStep].classList.add('active');
+        }
+    }
+});
+    // Previous button click handler
+    prevBtn.addEventListener('click', function() {
+        if (currentStep > 0 && currentStep < totalSteps - 1) {
+            currentStep--;
+            showStep(currentStep);
+            updateProgress();
+            
+            // Reset button text if coming back from review step
+            if (currentStep < totalSteps - 2) {
+                nextBtn.textContent = 'Next';
+                nextBtn.disabled = false;
+            }
+            
+            // Clear any error states from the previous step
+            //const currentStepElement = steps[currentStep];
+            //currentStepElement.querySelectorAll('.form-group').forEach(group => {
+                //group.classList.remove('error');
+            //});
+        }
+    });
+
+    // Show step function
+    function showStep(stepIndex) {
+        console.log('Showing step:', stepIndex);
+        
+        steps.forEach((step, index) => {
+            step.classList.toggle('active', index === stepIndex);
+        });
+
+        // Update button states based on current step
+        if (stepIndex === 0) {
+            // First step - disable previous button
+            prevBtn.disabled = true;
+            nextBtn.textContent = 'Next';
+            nextBtn.style.display = 'inline-block';
+            prevBtn.style.display = 'inline-block';
+        } else if (stepIndex === totalSteps - 2) {
+            // Review step (second to last)
+            prevBtn.disabled = false;
+            nextBtn.textContent = 'Submit Application';
+            nextBtn.style.display = 'inline-block';
+            prevBtn.style.display = 'inline-block';
+        } else if (stepIndex === totalSteps - 1) {
+            // Final confirmation step
+            prevBtn.style.display = 'none';
+            nextBtn.style.display = 'none';
+        } else {
+            // Middle steps - enable previous button
+            prevBtn.disabled = false;
+            nextBtn.textContent = 'Next';
+            nextBtn.style.display = 'inline-block';
+            prevBtn.style.display = 'inline-block';
+        }
+    }
+
+    // Update progress bar
+    function updateProgress() {
+        // Calculate progress: exclude the final confirmation step from progress calculation
+        const progressSteps = totalSteps - 1;
+        const progress = (currentStep / progressSteps) * 100;
+        progressFill.style.width = `${Math.min(progress, 100)}%`;
+    }
+
+    // Setup account type selection
+    function setupAccountTypeSelection() {
+        const accountTypeInputs = document.querySelectorAll('input[name="accountType"]');
+        const accountTypeLabels = document.querySelectorAll('.account-type');
+
+        accountTypeInputs.forEach((input) => {
+            input.addEventListener('change', function() {
+                // Remove selected class from all labels
+                accountTypeLabels.forEach(label => {
+                    label.classList.remove('selected');
+                });
+                
+                // Add selected class to the parent label of the checked input
+                if (this.checked) {
+                    this.closest('.account-type').classList.add('selected');
+                    clearAccountTypeError();
+                    showStepSuccessMessage();
+                }
+            });
+        });
+
+        // Add click handlers to labels for better UX
+        accountTypeLabels.forEach((label) => {
+            label.addEventListener('click', function(e) {
+                // Prevent double-triggering if clicking directly on radio button
+                if (e.target.type === 'radio') {
+                    return;
+                }
+                
+                const input = this.querySelector('input[type="radio"]');
+                if (input && !input.checked) {
+                    input.checked = true;
+                    input.dispatchEvent(new Event('change'));
+                }
+            });
+        });
+    }
+
+    // Account type error handling
+    function showAccountTypeError() {
+        const accountTypeGroup = document.getElementById('accountTypeGroup');
+        if (accountTypeGroup) {
+            accountTypeGroup.classList.add('error');
+        }
+        
+        const stepSuccessMessage = document.getElementById('stepSuccessMessage');
+        if (stepSuccessMessage) {
+            stepSuccessMessage.classList.remove('show');
+        }
+    }
+
+    function clearAccountTypeError() {
+        const accountTypeGroup = document.getElementById('accountTypeGroup');
+        if (accountTypeGroup) {
+            accountTypeGroup.classList.remove('error');
+        }
+    }
+
+    // Step-specific success message
+    function showStepSuccessMessage() {
+        const stepSuccessMessage = document.getElementById('stepSuccessMessage');
+        if (stepSuccessMessage) {
+            stepSuccessMessage.classList.add('show');
+            
+            setTimeout(() => {
+                if (stepSuccessMessage) {
+                    stepSuccessMessage.classList.remove('show');
+                }
+            }, 3000);
+        }
+    }
+
+    // Validate current step
+    function validateStep(stepIndex) {
+    console.log('Validating step:', stepIndex);
+    
+    let isValid = true;
+    const currentStepElement = steps[stepIndex];
+    
+    // Reset error states
+    currentStepElement.querySelectorAll('.form-group, .checkbox-group').forEach(group => {
+        group.classList.remove('error');
+    });
+
+    // Validate account type step (step 0)
+    if (stepIndex === 0) {
+        const selectedAccountType = document.querySelector('input[name="accountType"]:checked');
+        if (!selectedAccountType) {
+            showAccountTypeError();
+            isValid = false;
+        } else {
+            clearAccountTypeError();
+        }
+        console.log('Account type validation result:', isValid);
+        return isValid;
+    }
+
+    // Validate required fields for other steps
+    const inputs = currentStepElement.querySelectorAll('input[required], select[required]');
+    
+    inputs.forEach(input => {
+        console.log('Checking input:', input.name || input.id, 'Value:', input.value);
+        
+        if (!input.value.trim()) {
+            console.log('Input failed validation:', input.name || input.id);
+            
+            // Try to find the appropriate parent container with better error handling
+            let parentContainer = input.closest('.form-group');
+            
+            // If no .form-group found, try .checkbox-group
+            if (!parentContainer) {
+                parentContainer = input.closest('.checkbox-group');
+            }
+            
+            // If still no container found, create error handling for the input itself
+            if (parentContainer) {
+                parentContainer.classList.add('error');
+            } else {
+                console.error('No .form-group or .checkbox-group found for input:', input.name || input.id);
+                console.log('Input parent elements:', input.parentElement);
+                
+                // Fallback: add error class to the input itself
+                input.classList.add('error');
+            }
+            
+            isValid = false;
+        } else {
+            // Remove error class if field has value
+            let parentContainer = input.closest('.form-group') || input.closest('.checkbox-group');
+            if (parentContainer) {
+                parentContainer.classList.remove('error');
+            } else {
+                // Remove error class from input itself if no container found
+                input.classList.remove('error');
+            }
+        }
+    });
+
+    // Special validations for specific steps
+    if (stepIndex === 1) { // Personal Info step
+        isValid = validatePersonalInfo() && isValid;
+    } else if (stepIndex === 2) { // Address step
+        isValid = validateAddress() && isValid;
+    } else if (stepIndex === 3) { // Financial Information step
+        // Add validation for financial info if needed
+        // For now, it will use the default required field validation
+    } else if (stepIndex === 4) { // Account Setup step
+        isValid = validateAccountSetup() && isValid;
+    } else if (stepIndex === 5) { // Review step
+        isValid = validateReviewStep() && isValid;
+    }
+
+    console.log('Step validation result:', isValid);
+    return isValid;
+}
+
+    // Validate Personal Information (Step 1)
+    function validatePersonalInfo() {
+        let isValid = true;
+
+        const email = document.getElementById('email');
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(email.value)) {
+            email.closest('.form-group').classList.add('error');
+            isValid = false;
+        } else {
+            email.closest('.form-group').classList.remove('error');
+        }
+
+        const dob = document.getElementById('dateOfBirth');
+        if (dob.value) {
+            const birthDate = new Date(dob.value);
+            const today = new Date();
+            const age = today.getFullYear() - birthDate.getFullYear();
+            const monthDiff = today.getMonth() - birthDate.getMonth();
+            
+            // Check if birthday has occurred this year
+            const adjustedAge = monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate()) ? age - 1 : age;
+            
+            if (adjustedAge < 18 || birthDate > today) {
+                dob.closest('.form-group').classList.add('error');
+                isValid = false;
+            } else {
+                dob.closest('.form-group').classList.remove('error');
+            }
+        }
+
+        const ssn = document.getElementById('ssn');
+        const ssnRegex = /^\d{3}-\d{2}-\d{4}$/;
+        if (!ssnRegex.test(ssn.value)) {
+            ssn.closest('.form-group').classList.add('error');
+            isValid = false;
+        } else {
+            ssn.closest('.form-group').classList.remove('error');
+        }
+
+        return isValid;
+    }
+
+    // Validate Address (Step 2)
+    function validateAddress() {
+        let isValid = true;
+
+        const zip = document.getElementById('zip');
+        const zipRegex = /^\d{5}(-\d{4})?$/;
+        if (!zipRegex.test(zip.value)) {
+            zip.closest('.form-group').classList.add('error');
+            isValid = false;
+        } else {
+            zip.closest('.form-group').classList.remove('error');
+        }
+
+        return isValid;
+    }
+
+    // Validate Account Setup (Step 4)
+    function validateAccountSetup() {
+        let isValid = true;
+
+        const username = document.getElementById('username');
+        const usernameRegex = /^[a-zA-Z0-9]{6,20}$/;
+        if (!usernameRegex.test(username.value)) {
+            username.closest('.form-group').classList.add('error');
+            isValid = false;
+        } else {
+            username.closest('.form-group').classList.remove('error');
+        }
+
+        const password = document.getElementById('password');
+        const confirmPassword = document.getElementById('confirmPassword');
+        const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/;
+
+        if (!passwordRegex.test(password.value)) {
+            password.closest('.form-group').classList.add('error');
+            isValid = false;
+        } else {
+            password.closest('.form-group').classList.remove('error');
+        }
+
+        if (password.value !== confirmPassword.value) {
+            confirmPassword.closest('.form-group').classList.add('error');
+            isValid = false;
+        } else {
+            confirmPassword.closest('.form-group').classList.remove('error');
+        }
+
+        return isValid;
+    }
+
+    // Validate Review Step (Step 5)
+    function validateReviewStep() {
+    let isValid = true;
+
+    const termsAgreement = document.getElementById('termsAgreement');
+    const electronicConsent = document.getElementById('electronicConsent');
+    
+    if (!termsAgreement.checked) {
+        const termsError = document.getElementById('termsError');
+        if (termsError) {
+            termsError.style.display = 'block';
+        }
+        
+        // Add error class to checkbox group
+        const termsGroup = termsAgreement.closest('.checkbox-group');
+        if (termsGroup) {
+            termsGroup.classList.add('error');
+        }
+        isValid = false;
+    } else {
+        const termsError = document.getElementById('termsError');
+        if (termsError) {
+            termsError.style.display = 'none';
+        }
+        
+        // Remove error class from checkbox group
+        const termsGroup = termsAgreement.closest('.checkbox-group');
+        if (termsGroup) {
+            termsGroup.classList.remove('error');
+        }
+    }
+
+    if (!electronicConsent.checked) {
+        const consentError = document.getElementById('consentError');
+        if (consentError) {
+            consentError.style.display = 'block';
+        }
+        
+        // Add error class to checkbox group
+        const consentGroup = electronicConsent.closest('.checkbox-group');
+        if (consentGroup) {
+            consentGroup.classList.add('error');
+        }
+        isValid = false;
+    } else {
+        const consentError = document.getElementById('consentError');
+        if (consentError) {
+            consentError.style.display = 'none';
+        }
+        
+        // Remove error class from checkbox group
+        const consentGroup = electronicConsent.closest('.checkbox-group');
+        if (consentGroup) {
+            consentGroup.classList.remove('error');
+        }
+    }
+
+    return isValid;
+}
+    // Show success message (main form success message)
+    function showSuccessMessage() {
+        successMessage.style.display = 'block';
+        setTimeout(() => {
+            successMessage.style.display = 'none';
+        }, 3000);
+    } 
+
+    // Review form data before submission
+    function reviewFormData() {
+        // Account Type
+        const accountType = document.querySelector('input[name="accountType"]:checked').value;
+        let accountTypeText = '';
+        if (accountType === 'checking') accountTypeText = 'Personal Checking Account';
+        else if (accountType === 'savings') accountTypeText = 'High-Yield Savings Account';
+        else if (accountType === 'premium') accountTypeText = 'Premium Banking Account';
+        document.getElementById('reviewAccountType').textContent = accountTypeText;
+
+        // Personal Information
+        const firstName = document.getElementById('firstName').value;
+        const lastName = document.getElementById('lastName').value;
+        const dob = document.getElementById('dateOfBirth').value;
+        const email = document.getElementById('email').value;
+        const phone = document.getElementById('phone').value;
+        document.getElementById('reviewPersonalInfo').innerHTML = 
+            `${firstName} ${lastName}<br>Date of Birth: ${dob}<br>Email: ${email}<br>Phone: ${phone}`;
+
+        // Address
+        const address1 = document.getElementById('address1').value;
+        const address2 = document.getElementById('address2').value;
+        const city = document.getElementById('city').value;
+        const state = document.getElementById('state').value;
+        const zip = document.getElementById('zip').value;
+        document.getElementById('reviewAddress').innerHTML = 
+            `${address1}${address2 ? ', ' + address2 : ''}<br>${city}, ${state} ${zip}`;
+
+        // Financial Information
+        const employmentStatus = document.getElementById('employmentStatus').value;
+        const employer = document.getElementById('employer').value;
+        const occupation = document.getElementById('occupation').value;
+        const annualIncome = document.getElementById('annualIncome').value;
+        const sourceOfFunds = document.getElementById('sourceOfFunds').value;
+        document.getElementById('reviewFinancialInfo').innerHTML = 
+            `Employment: ${employmentStatus}${employer ? ' at ' + employer : ''}<br>Occupation: ${occupation}<br>Annual Income: ${annualIncome}<br>Source of Funds: ${sourceOfFunds}`;
+
+        // Credentials
+        const username = document.getElementById('username').value;
+        document.getElementById('reviewCredentials').innerHTML = 
+            `Username: ${username}<br>Password: ********`;
+    }
+
+    // Submit form (simulated)
+    // Updated submitForm function - replace your existing one
+async function submitForm() {
+    try {
+        // Show loading state
+        nextBtn.innerHTML = '<span class="loading-spinner"></span> Processing...';
+        nextBtn.disabled = true;
+
+        // Collect all form data
+        const formData = collectFormData();
+        
+        // Validate data one more time before sending
+        if (!validateFormData(formData)) {
+            throw new Error('Form validation failed');
+        }
+
+        // Send data to backend
+        const response = await fetch(`${API_CONFIG.BASE_URL}/users/register`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(formData)
+        });
+
+        // Handle response
+        if (!response.ok) {
+            const errorData = await response.json().catch(() => null);
+            throw new Error(errorData?.message || `HTTP error! status: ${response.status}`);
+        }
+
+        const result = await response.json();
+        
+        // Handle successful registration
+        handleSuccessfulRegistration(result);
+
+    } catch (error) {
+        console.error('Form submission error:', error);
+        handleSubmissionError(error);
+    }
+}
+
+// Collect all form data from all steps
+function collectFormData() {
+    // Get account type
+    const accountType = document.querySelector('input[name="accountType"]:checked').value;
+    
+    // Get personal information
+    const firstName = document.getElementById('firstName').value.trim();
+    const lastName = document.getElementById('lastName').value.trim();
+    const dateOfBirth = document.getElementById('dateOfBirth').value;
+    const email = document.getElementById('email').value.trim().toLowerCase();
+    const phone = document.getElementById('phone').value.trim();
+    const ssn = document.getElementById('ssn').value.trim();
+    
+    // Get address information
+    const address1 = document.getElementById('address1').value.trim();
+    const address2 = document.getElementById('address2').value.trim();
+    const city = document.getElementById('city').value.trim();
+    const state = document.getElementById('state').value.trim();
+    const zip = document.getElementById('zip').value.trim();
+    
+    // Get employment/financial information
+    const employmentStatus = document.getElementById('employmentStatus').value;
+    const employer = document.getElementById('employer').value.trim();
+    const occupation = document.getElementById('occupation').value.trim();
+    const annualIncome = document.getElementById('annualIncome').value;
+    const sourceOfFunds = document.getElementById('sourceOfFunds').value;
+    
+    // Get account credentials
+    const username = document.getElementById('username').value.trim();
+    const password = document.getElementById('password').value;
+    
+    // Structure data to match backend schema
+    const formData = {
+        // Basic Authentication Fields
+        username: username,
+        email: email,
+        password: password,
+        
+        // Personal Information
+        firstName: firstName,
+        lastName: lastName,
+        dateOfBirth: dateOfBirth,
+        phone: phone,
+        ssn: ssn,
+        
+        // Address Information (nested object)
+        address: {
+            street1: address1,
+            street2: address2,
+            city: city,
+            state: state,
+            zipCode: zip
+        },
+        
+        // Employment/Financial Information (nested object)
+        employment: {
+            status: employmentStatus,
+            employer: employer,
+            occupation: occupation,
+            annualIncome: annualIncome,
+            sourceOfFunds: sourceOfFunds
+        },
+        
+        // Account Information
+        accountType: accountType
+    };
+    
+    return formData;
+}
+
+// Validate collected form data
+function validateFormData(data) {
+    // Basic validation to ensure required fields are present
+    const requiredFields = ['username', 'email', 'password', 'firstName', 'lastName', 'dateOfBirth', 'phone', 'ssn', 'accountType'];
+    
+    for (const field of requiredFields) {
+        if (!data[field] || (typeof data[field] === 'string' && data[field].trim() === '')) {
+            console.error(`Required field missing: ${field}`);
+            return false;
+        }
+    }
+    
+    // Validate nested address object
+    const requiredAddressFields = ['street1', 'city', 'state', 'zipCode'];
+    for (const field of requiredAddressFields) {
+        if (!data.address[field] || data.address[field].trim() === '') {
+            console.error(`Required address field missing: ${field}`);
+            return false;
+        }
+    }
+    
+    // Validate employment fields based on status
+    if (data.employment.status === 'employed' || data.employment.status === 'self-employed') {
+        if (!data.employment.employer || !data.employment.occupation) {
+            console.error('Employer and occupation required for employed/self-employed users');
+            return false;
+        }
+    }
+    
+    return true;
+}
+
+// Handle successful registration
+function handleSuccessfulRegistration(result) {
+    console.log('Registration successful:', result);
+    
+    // Update the final step with real data from backend
+    document.getElementById('applicationNumber').textContent = result.accountNumber || 'Generated';
+    document.getElementById('confirmationEmail').textContent = result.email || document.getElementById('email').value;
+    
+    // Hide navigation buttons
+    nextBtn.style.display = 'none';
+    prevBtn.style.display = 'none';
+    
+    // Update progress to 100%
+    progressFill.style.width = '100%';
+    
+    // Show success message
+    showSuccessMessage();
+    
+    // Optional: Store user info for future use (not sensitive data)
+    try {
+        const userInfo = {
+            accountNumber: result.accountNumber,
+            email: result.email,
+            fullName: `${result.firstName} ${result.lastName}`,
+            accountType: result.accountType
+        };
+        // Note: We're not using localStorage as it's not supported in Claude.ai artifacts
+        // In a real application, you might store this in localStorage
+        console.log('User registered successfully:', userInfo);
+    } catch (error) {
+        console.error('Error storing user info:', error);
+    }
+}
+
+// Handle submission errors
+function handleSubmissionError(error) {
+    console.error('Submission error:', error);
+    
+    // Reset button state
+    nextBtn.innerHTML = 'Submit Application';
+    nextBtn.disabled = false;
+    
+    // Determine error type and show appropriate message
+    let errorMessage = 'An error occurred while processing your application. Please try again.';
+    
+    if (error.message.includes('duplicate') || error.message.includes('already exists')) {
+        errorMessage = 'An account with this email or username already exists. Please use different credentials.';
+    } else if (error.message.includes('validation')) {
+        errorMessage = 'Please check your information and ensure all fields are filled correctly.';
+    } else if (error.message.includes('network') || error.message.includes('fetch')) {
+        errorMessage = 'Network error. Please check your connection and try again.';
+    } else if (error.message.includes('500') || error.message.includes('server')) {
+        errorMessage = 'Server error. Please try again in a few minutes.';
+    }
+    
+    // Show error message to user
+    showErrorMessage(errorMessage);
+    
+    // Optionally, allow user to go back and fix issues
+    // You might want to enable the previous button here
+    if (currentStep > 0) {
+        prevBtn.disabled = false;
+    }
+}
+
+// Show error message function
+function showErrorMessage(message) {
+    // Create or update error message element
+    let errorDiv = document.getElementById('submissionError');
+    if (!errorDiv) {
+        errorDiv = document.createElement('div');
+        errorDiv.id = 'submissionError';
+        errorDiv.className = 'error-message';
+        errorDiv.style.cssText = `
+            background-color: #fee;
+            color: #c33;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 20px 0;
+            border: 1px solid #fcc;
+            font-size: 14px;
+        `;
+        
+        // Insert error message before the navigation buttons
+        const buttonContainer = document.querySelector('.form-navigation');
+        if (buttonContainer) {
+            buttonContainer.parentNode.insertBefore(errorDiv, buttonContainer);
+        }
+    }
+    
+    errorDiv.textContent = message;
+    errorDiv.style.display = 'block';
+    
+    // Scroll to error message
+    errorDiv.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    
+    // Hide error message after 10 seconds
+    setTimeout(() => {
+        if (errorDiv) {
+            errorDiv.style.display = 'none';
+        }
+    }, 10000);
+}
+
+// Enhanced success message function
+/*function showSuccessMessage() {
+    if (successMessage) {
+        successMessage.style.display = 'block';
+        successMessage.innerHTML = `
+            <div style="text-align: center; padding: 20px;">
+                <h3 style="color: #2c5530; margin-bottom: 15px;">🎉 Application Submitted Successfully!</h3>
+                <p>Your account has been created and is being processed.</p>
+                <p>You will receive a confirmation email shortly.</p>
+            </div>
+        `;
+        
+        // Don't auto-hide success message on final step
+        // User should see it until they leave the page
+    }
+}*/
+
+    // Password strength indicator
+    const passwordInput = document.getElementById('password');
+    if (passwordInput) {
+        passwordInput.addEventListener('input', function() {
+            const password = this.value;
+            const strengthFill = document.getElementById('passwordStrength');
+            const strengthText = document.getElementById('passwordStrengthText');
+            
+            // Reset
+            strengthFill.style.width = '0%';
+            strengthFill.className = 'strength-fill';
+            strengthText.textContent = 'Password strength';
+            
+            if (password.length === 0) return;
+            
+            // Calculate strength
+            let strength = 0;
+            if (password.length >= 8) strength += 1;
+            if (/[A-Z]/.test(password)) strength += 1;
+            if (/[a-z]/.test(password)) strength += 1;
+            if (/[0-9]/.test(password)) strength += 1;
+            if (/[^A-Za-z0-9]/.test(password)) strength += 1;
+            
+            // Update UI
+            const width = (strength / 5) * 100;
+            strengthFill.style.width = `${width}%`;
+            
+            if (strength <= 2) {
+                strengthFill.classList.add('strength-weak');
+                strengthText.textContent = 'Weak';
+            } else if (strength === 3) {
+                strengthFill.classList.add('strength-medium');
+                strengthText.textContent = 'Medium';
+            } else {
+                strengthFill.classList.add('strength-strong');
+                strengthText.textContent = 'Strong';
+            }
+        });
+    }
+
+    // Show/hide employer fields based on employment status
+    const employmentStatus = document.getElementById('employmentStatus');
+    if (employmentStatus) {
+        employmentStatus.addEventListener('change', function() {
+            const status = this.value;
+            const employerGroup = document.getElementById('employerGroup');
+            const occupationGroup = document.getElementById('occupationGroup');
+            
+            if (status === 'employed' || status === 'self-employed') {
+                employerGroup.style.display = 'block';
+                occupationGroup.style.display = 'block';
+            } else {
+                employerGroup.style.display = 'none';
+                occupationGroup.style.display = 'none';
+            }
+        });
+    }
+
+    // Format SSN input
+    const ssnInput = document.getElementById('ssn');
+    if (ssnInput) {
+        ssnInput.addEventListener('input', function(e) {
+            let value = this.value.replace(/\D/g, '');
+            if (value.length > 3) value = value.slice(0, 3) + '-' + value.slice(3);
+            if (value.length > 6) value = value.slice(0, 6) + '-' + value.slice(6);
+            this.value = value.slice(0, 11);
+        });
+    }
+
+    // Format phone number input
+    const phoneInput = document.getElementById('phone');
+    if (phoneInput) {
+        phoneInput.addEventListener('input', function(e) {
+            let value = this.value.replace(/\D/g, '');
+            if (value.length > 3) value = '(' + value.slice(0, 3) + ') ' + value.slice(3);
+            if (value.length > 9) value = value.slice(0, 9) + '-' + value.slice(9);
+            this.value = value.slice(0, 14);
+        });
+    }
+});
+
+
+    </script>
+</body>
+</html>

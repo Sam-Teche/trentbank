@@ -1,0 +1,540 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Transfer Processing - Secure Money Transfer</title>
+    <link rel="stylesheet" href="styles/pending.css">
+</head>
+<body>
+    <!-- Demo Transaction Row (Remove this in production) -->
+    <div class="demo-container" style="max-width: 600px; margin: 20px auto; padding: 20px; background: white; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+        <h3>Demo Transaction (Click to view receipt)</h3>
+        <div class="transaction-item" data-transaction-id="demo123" onclick="openTransactionReceipt(this.dataset.transactionId)" style="padding: 15px; border: 1px solid #e0e0e0; border-radius: 8px; cursor: pointer; transition: all 0.3s ease; background: white;">
+            <div class="transaction-info">
+
+                
+                <h4 style="color: #333; margin-bottom: 5px;">International Wire Transfer</h4>
+                <p style="color: #666; font-size: 14px;">To: Damilola Adebayo</p>
+                <span class="amount" style="float: right; font-weight: bold; color: #e74c3c;">-$9,054.00</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Overlay -->
+    <div id="receiptModal" class="modal-overlay" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; align-items: center; justify-content: center; padding: 20px;">
+        <div class="modal-wrapper" style="width: 100%; max-width: 700px; max-height: 90vh; overflow-y: auto; position: relative;">
+            
+            <!-- Loading State -->
+            <div id="loadingState" class="loading-container" style="background: white; border-radius: 20px; padding: 60px 20px; text-align: center;">
+                <div class="loading-spinner" style="width: 40px; height: 40px; border: 4px solid #f3f3f3; border-top: 4px solid #4a90e2; border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 20px;"></div>
+                <p>Loading transaction details...</p>
+            </div>
+
+            <!-- Error State -->
+            <div id="errorState" class="error-container" style="display: none; background: white; border-radius: 20px; padding: 60px 20px; text-align: center;">
+                <div class="error-icon" style="font-size: 48px; margin-bottom: 20px;">❌</div>
+                <h3>Unable to Load Transaction</h3>
+                <p id="errorMessage" style="margin: 20px 0;">Failed to fetch transaction details</p>
+                <button onclick="window.location.reload()" class="btn btn-primary" style="margin-top: 15px;">🔄 Retry</button>
+            </div>
+
+            <!-- Receipt Content -->
+            <div id="receiptContent" class="receipt-content" style="display: none;">
+                <!-- Modal Header -->
+                <div class="modal-header" style="background: #f8f9fa; padding: 15px 20px; border-radius: 20px 20px 0 0; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #e0e0e0;">
+                    <button onclick="closeReceiptModal()" class="close-btn" style="background: none; border: none; font-size: 24px; cursor: pointer; color: #666; padding: 5px;">✕</button>
+                    <h2 style="margin: 0; color: #333; font-size: 18px;">Transaction Receipt</h2>
+                    <button onclick="printReceipt()" class="print-btn btn btn-secondary" style="padding: 8px 16px; font-size: 14px;">🖨️ Print</button>
+                </div>
+
+                <!-- Receipt Container -->
+                <div class="container">
+                    <div class="header">
+                        <div class="status-icon">⏳</div>
+                        <h1>Pending</h1>
+                        <p>Your money transfer is being processed securely</p>
+                    </div>
+
+                    <div class="content">
+                        <div class="notification-banner">
+                            <span class="icon">📧</span>
+                            <p>A confirmation email has been sent to your registered email address</p>
+                        </div>
+
+                        <div class="progress-section">
+                            <h3>Processing Your Transfer</h3>
+                            <div class="progress-bar">
+                                <div class="progress-fill"></div>
+                            </div>
+                            <p>Please wait while we process your transaction...</p>
+                        </div>
+
+                        <div class="status-steps">
+                            <div class="step completed">
+                                <div class="step-circle">✓</div>
+                                <div class="step-label">Verified</div>
+                            </div>
+                            <div class="step completed">
+                                <div class="step-circle">✓</div>
+                                <div class="step-label">Authorized</div>
+                            </div>
+                            <div class="step active">
+                                <div class="step-circle">⏳</div>
+                                <div class="step-label">Processing</div>
+                            </div>
+                            <div class="step">
+                                <div class="step-circle">4</div>
+                                <div class="step-label">Completed</div>
+                            </div>
+                        </div>
+
+                        <div class="transfer-details">
+                            <div class="detail-row">
+                                <span class="detail-label">Recipient Name</span>
+                                <span class="detail-value" id="recipientName">Loading...</span>
+                            </div>
+                            <div class="detail-row">
+                                <span class="detail-label">Transfer Amount</span>
+                                <span class="detail-value amount-highlight" id="transferAmount">$0.00</span>
+                            </div>
+                            <div class="detail-row">
+                                <span class="detail-label">Processing Fee</span>
+                                <span class="detail-value" id="processingFee">$0.00</span>
+                            </div>
+                            <div class="detail-row">
+                                <span class="detail-label">Total Debited</span>
+                                <span class="detail-value amount-highlight" id="totalAmount">$0.00</span>
+                            </div>
+                            <div class="detail-row">
+                                <span class="detail-label">Recipient Bank</span>
+                                <span class="detail-value" id="recipientBank">Loading...</span>
+                            </div>
+                            <div class="detail-row">
+                                <span class="detail-label">Account Number</span>
+                                <span class="detail-value" id="accountNumber">Loading...</span>
+                            </div>
+                            <div class="detail-row">
+                                <span class="detail-label">Transaction Date</span>
+                                <span class="detail-value" id="transactionDate">Loading...</span>
+                            </div>
+                        </div>
+
+                        <div class="reference-number">
+                            <h3>📋 Transaction Reference</h3>
+                            <div class="ref-code" id="referenceCode">Loading...</div>
+                            <p class="ref-note">Save this reference number for your records</p>
+                        </div>
+
+                        <div class="estimated-time">
+                            <div class="time-icon">⏰</div>
+                            <h3>Estimated Completion Time</h3>
+                            <p><strong id="completionTime">1-3 Business Days</strong><br>
+                            You'll receive a notification once the transfer is complete</p>
+                        </div>
+
+                        <div class="security-notice">
+                            <span class="icon">🔒</span>
+                            <p>Your transfer is protected by bank-level security and encryption. All transactions are monitored for suspicious activity.</p>
+                        </div>
+
+                        <div class="actions">
+                            <button onclick="printReceipt()" class="btn btn-secondary">
+                                🖨️ Print Receipt
+                            </button>
+                            <button onclick="closeReceiptModal()" class="btn btn-primary">
+                                Close
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+
+<script>
+            // Global variables
+        let currentTransaction = null;
+
+        // Initialize when DOM is loaded
+        document.addEventListener('DOMContentLoaded', function() {
+            // Get transaction ID from URL parameters or other source
+            const urlParams = new URLSearchParams(window.location.search);
+            const transactionId = urlParams.get('transactionId');
+            
+            if (transactionId) {
+                loadTransactionData(transactionId);
+            } else {
+                // For testing purposes - you can remove this in production
+                console.warn('No transaction ID found. Add ?transactionId=YOUR_ID to URL for testing');
+                showError('No transaction ID provided');
+            }
+        });
+
+        // Main function to load transaction data
+        async function loadTransactionData(transactionId) {
+            try {
+                // Show loading state
+                showLoadingState();
+                
+                // Fetch transaction data from API
+                const response = await fetch(`/transaction/${transactionId}`, {
+                    method: 'GET',
+                    credentials: 'include', // Include HTTP-only cookies
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                if (!response.ok) {
+                    throw new Error(`Failed to fetch transaction: ${response.status} ${response.statusText}`);
+                }
+
+                const data = await response.json();
+                currentTransaction = data.transaction;
+
+                // Populate the page with transaction data
+                populateTransactionData(currentTransaction);
+                
+                // Hide loading state
+                hideLoadingState();
+
+            } catch (error) {
+                console.error('Error loading transaction:', error);
+                showError(error.message);
+            }
+        }
+
+        // Populate all elements with transaction data
+        function populateTransactionData(transaction) {
+            const metadata = transaction.metadata || {};
+            
+            // Update status and progress based on transaction status
+            updateTransactionStatus(transaction.status);
+            
+            // Populate recipient name
+            const recipientNameEl = document.getElementById('recipientName');
+            if (recipientNameEl) {
+                recipientNameEl.textContent = metadata.recipientName || 'N/A';
+            }
+            
+            // Populate transfer amount
+            const transferAmountEl = document.getElementById('transferAmount');
+            if (transferAmountEl) {
+                transferAmountEl.textContent = formatCurrency(metadata.transferAmount || transaction.amount);
+            }
+            
+            // Populate processing fee
+            const processingFeeEl = document.getElementById('processingFee');
+            if (processingFeeEl) {
+                processingFeeEl.textContent = formatCurrency(metadata.transferFee || 0);
+            }
+            
+            // Populate total amount
+            const totalAmountEl = document.getElementById('totalAmount');
+            if (totalAmountEl) {
+                totalAmountEl.textContent = formatCurrency(metadata.totalAmount || transaction.amount);
+            }
+            
+            // Populate recipient bank
+            const recipientBankEl = document.getElementById('recipientBank');
+            if (recipientBankEl) {
+                recipientBankEl.textContent = metadata.bankName || 'N/A';
+            }
+            
+            // Populate account number
+            const accountNumberEl = document.getElementById('accountNumber');
+            if (accountNumberEl) {
+                accountNumberEl.textContent = metadata.accountNumber || 'N/A';
+            }
+            
+            // Populate transaction date
+            const transactionDateEl = document.getElementById('transactionDate');
+            if (transactionDateEl) {
+                transactionDateEl.textContent = formatDate(transaction.date);
+            }
+            
+            // Populate reference code
+            const referenceCodeEl = document.getElementById('referenceCode');
+            if (referenceCodeEl) {
+                referenceCodeEl.textContent = transaction.reference || 'N/A';
+            }
+        }
+
+        // Update transaction status and progress steps
+        function updateTransactionStatus(status) {
+            const steps = document.querySelectorAll('.status-steps .step');
+            const headerTitle = document.querySelector('.header h1');
+            const headerDescription = document.querySelector('.header p');
+            const statusIcon = document.querySelector('.status-icon');
+            const progressTitle = document.querySelector('.progress-section h3');
+            
+            // Reset all steps
+            steps.forEach(step => {
+                step.classList.remove('completed', 'active');
+            });
+            
+            switch (status) {
+                case 'pending':
+                    // Update header
+                    if (headerTitle) headerTitle.textContent = 'Processing';
+                    if (headerDescription) headerDescription.textContent = 'Your money transfer is being processed securely';
+                    if (statusIcon) statusIcon.textContent = '⏳';
+                    if (progressTitle) progressTitle.textContent = 'Processing Your Transfer';
+                    
+                    // Update progress steps
+                    if (steps[0]) steps[0].classList.add('completed');
+                    if (steps[1]) steps[1].classList.add('completed');
+                    if (steps[2]) steps[2].classList.add('active');
+                    break;
+                    
+                case 'completed':
+                    // Update header
+                    if (headerTitle) headerTitle.textContent = 'Completed';
+                    if (headerDescription) headerDescription.textContent = 'Your money transfer has been completed successfully';
+                    if (statusIcon) statusIcon.textContent = '✅';
+                    if (progressTitle) progressTitle.textContent = 'Transfer Completed';
+                    
+                    // Update progress steps - all completed
+                    steps.forEach(step => step.classList.add('completed'));
+                    
+                    // Update progress bar to 100%
+                    const progressFill = document.querySelector('.progress-fill');
+                    if (progressFill) {
+                        progressFill.style.width = '100%';
+                        progressFill.style.animation = 'none';
+                    }
+                    break;
+                    
+                case 'failed':
+                    // Update header
+                    if (headerTitle) headerTitle.textContent = 'Failed';
+                    if (headerDescription) headerDescription.textContent = 'Your money transfer could not be completed';
+                    if (statusIcon) statusIcon.textContent = '❌';
+                    if (progressTitle) progressTitle.textContent = 'Transfer Failed';
+                    
+                    // Update progress steps - show failure
+                    if (steps[0]) steps[0].classList.add('completed');
+                    if (steps[1]) steps[1].classList.add('completed');
+                    if (steps[2]) {
+                        steps[2].classList.add('active');
+                        const circle = steps[2].querySelector('.step-circle');
+                        if (circle) circle.textContent = '❌';
+                    }
+                    
+                    // Change header color to red for failed transactions
+                    const header = document.querySelector('.header');
+                    if (header) {
+                        header.style.background = 'linear-gradient(135deg, #f44336, #d32f2f)';
+                    }
+                    break;
+                    
+                default:
+                    console.warn('Unknown transaction status:', status);
+            }
+        }
+
+        // Show loading state
+        function showLoadingState() {
+            // Replace all dynamic content with loading text
+            const loadingElements = [
+                'recipientName', 'transferAmount', 'processingFee', 
+                'totalAmount', 'recipientBank', 'accountNumber', 'transactionDate'
+            ];
+            
+            loadingElements.forEach(id => {
+                const element = document.getElementById(id);
+                if (element) {
+                    element.textContent = 'Loading...';
+                    element.style.opacity = '0.6';
+                }
+            });
+            
+            // Show loading for reference code
+            const referenceCodeEl = document.getElementById('referenceCode');
+            if (referenceCodeEl) {
+                referenceCodeEl.textContent = 'Loading...';
+                referenceCodeEl.style.opacity = '0.6';
+            }
+        }
+
+        // Hide loading state
+        function hideLoadingState() {
+            const loadingElements = [
+                'recipientName', 'transferAmount', 'processingFee', 
+                'totalAmount', 'recipientBank', 'accountNumber', 'transactionDate', 'referenceCode'
+            ];
+            
+            loadingElements.forEach(id => {
+                const element = document.getElementById(id);
+                if (element) {
+                    element.style.opacity = '1';
+                }
+            });
+        }
+
+        // Show error state
+        function showError(message) {
+            // You can customize this based on your error handling preferences
+            console.error('Transaction error:', message);
+            
+            // Update header to show error
+            const headerTitle = document.querySelector('.header h1');
+            const headerDescription = document.querySelector('.header p');
+            const statusIcon = document.querySelector('.status-icon');
+            
+            if (headerTitle) headerTitle.textContent = 'Error';
+            if (headerDescription) headerDescription.textContent = 'Unable to load transaction details';
+            if (statusIcon) statusIcon.textContent = '❌';
+            
+            // Change header color to red
+            const header = document.querySelector('.header');
+            if (header) {
+                header.style.background = 'linear-gradient(135deg, #f44336, #d32f2f)';
+            }
+            
+            // Show error message in progress section
+            const progressSection = document.querySelector('.progress-section');
+            if (progressSection) {
+                progressSection.innerHTML = `
+                    <h3>Unable to Load Transaction</h3>
+                    <p style="color: #f44336; margin-top: 10px;">${message}</p>
+                    <button onclick="window.location.reload()" class="btn btn-primary" style="margin-top: 15px;">
+                        🔄 Retry
+                    </button>
+                `;
+            }
+        }
+
+        // Print receipt function
+        function printReceipt() {
+            // Add print-specific styling if needed
+            const printStyle = document.createElement('style');
+            printStyle.textContent = `
+                @media print {
+                    .actions { display: none !important; }
+                    body { background: white !important; }
+                }
+            `;
+            document.head.appendChild(printStyle);
+            
+            // Trigger print dialog
+            window.print();
+            
+            // Remove print style after printing
+            setTimeout(() => {
+                document.head.removeChild(printStyle);
+            }, 1000);
+        }
+
+        // Utility function to format currency
+        function formatCurrency(amount) {
+            if (amount === null || amount === undefined || isNaN(amount)) {
+                return '$0.00';
+            }
+            
+            return new Intl.NumberFormat('en-US', {
+                style: 'currency',
+                currency: 'USD',
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+            }).format(amount);
+        }
+
+        // Utility function to format date
+        function formatDate(dateString) {
+            if (!dateString) return 'N/A';
+            
+            try {
+                const date = new Date(dateString);
+                return date.toLocaleString('en-US', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    hour12: true
+                });
+            } catch (error) {
+                console.error('Error formatting date:', error);
+                return 'Invalid Date';
+            }
+        }
+
+        // Function to open transaction receipt (for integration with your transaction list)
+        function openTransactionReceipt(transactionId) {
+            // Option 1: Open in new window/tab
+            window.open(`/receipt.html?transactionId=${transactionId}`, '_blank');
+            
+            // Option 2: Navigate to receipt page
+            // window.location.href = `/receipt.html?transactionId=${transactionId}`;
+            
+            // Option 3: If you want to load in current page
+            // loadTransactionData(transactionId);
+        }
+
+        // Auto-refresh for pending transactions (optional)
+        function startAutoRefresh() {
+            if (currentTransaction && currentTransaction.status === 'pending') {
+                const refreshInterval = setInterval(async () => {
+                    try {
+                        const response = await fetch(`/transaction/${currentTransaction.id}`, {
+                            method: 'GET',
+                            credentials: 'include',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            }
+                        });
+                        
+                        if (response.ok) {
+                            const data = await response.json();
+                            const newStatus = data.transaction.status;
+                            
+                            // If status changed, update the page
+                            if (newStatus !== currentTransaction.status) {
+                                currentTransaction = data.transaction;
+                                populateTransactionData(currentTransaction);
+                                
+                                // Stop auto-refresh if transaction is no longer pending
+                                if (newStatus !== 'pending') {
+                                    clearInterval(refreshInterval);
+                                }
+                            }
+                        }
+                    } catch (error) {
+                        console.error('Auto-refresh error:', error);
+                        // Continue trying, don't clear interval
+                    }
+                }, 30000); // Refresh every 30 seconds
+                
+                // Store interval ID to clear later if needed
+                window.transactionRefreshInterval = refreshInterval;
+            }
+        }
+
+        // Start auto-refresh when page loads (optional - remove if not needed)
+        document.addEventListener('DOMContentLoaded', function() {
+            // Delay auto-refresh to start after initial load
+            setTimeout(() => {
+                if (currentTransaction) {
+                    startAutoRefresh();
+                }
+            }, 5000);
+        });
+
+        // Clean up auto-refresh when page unloads
+        window.addEventListener('beforeunload', function() {
+            if (window.transactionRefreshInterval) {
+                clearInterval(window.transactionRefreshInterval);
+            }
+        });
+
+        // Export functions for global access (if needed)
+        window.openTransactionReceipt = openTransactionReceipt;
+        window.printReceipt = printReceipt;
+
+    </script>
+</body>
+</html>
