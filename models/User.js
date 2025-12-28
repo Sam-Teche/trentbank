@@ -149,10 +149,10 @@ const userSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-// Indexes
-userSchema.index({ email: 1 });
-userSchema.index({ username: 1 });
-userSchema.index({ ssn: 1 });
+// // Indexes
+// userSchema.index({ email: 1 });
+// userSchema.index({ username: 1 });
+// userSchema.index({ ssn: 1 });
 
 // Virtuals
 userSchema.virtual("fullName").get(function () {

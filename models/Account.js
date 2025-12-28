@@ -118,10 +118,10 @@ const accountSchema = new mongoose.Schema(
   }
 );
 
-// Indexes for better performance
-accountSchema.index({ userId: 1, type: 1 });
-accountSchema.index({ accountNumber: 1 });
-accountSchema.index({ userId: 1, isPrimary: 1 });
+// // Indexes for better performance
+// accountSchema.index({ userId: 1, type: 1 });
+// accountSchema.index({ accountNumber: 1 });
+// accountSchema.index({ userId: 1, isPrimary: 1 });
 
 // Virtual for formatted account number (for display)
 accountSchema.virtual("formattedAccountNumber").get(function () {

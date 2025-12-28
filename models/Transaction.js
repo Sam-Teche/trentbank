@@ -56,9 +56,9 @@ const transactionSchema = new mongoose.Schema(
   }
 );
 
-// Index for better query performance
-transactionSchema.index({ userId: 1, date: -1 });
-transactionSchema.index({ reference: 1 });
-transactionSchema.index({ status: 1 });
+// // Index for better query performance
+// transactionSchema.index({ userId: 1, date: -1 });
+// transactionSchema.index({ reference: 1 });
+// transactionSchema.index({ status: 1 });
 
 module.exports = mongoose.model("Transaction", transactionSchema);
