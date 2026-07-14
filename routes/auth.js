@@ -248,6 +248,7 @@ router.post("/logout", (req, res) => {
 router.post("/signup", signupValidation, async (req, res) => {
   try {
     const errors = validationResult(req);
+
     if (!errors.isEmpty()) {
       return res.status(400).json({
         message: "Validation failed",
@@ -256,85 +257,105 @@ router.post("/signup", signupValidation, async (req, res) => {
     }
 
     const {
-      
       firstName,
       lastName,
       email,
       dateOfBirth,
       phone,
       ssn,
-      address1,
-      address2,
-      city,
-      state,
-      zip,
-      employmentStatus,
-      employer,
-      occupation,
-      annualIncome,
-      sourceOfFunds,
       username,
       password,
-      termsAgreement,
-      electronicConsent,
+      accountType,
+      address,
+      employment,
     } = req.body;
 
-    // Check if user already exists
+    // Validate nested objects
+    if (!address || !employment) {
+      return res.status(400).json({
+        message: "Address and employment information are required.",
+      });
+    }
+
+    // Check existing user
     const existingUser = await User.findOne({
       $or: [{ email }, { username }, { ssn }],
     });
 
     if (existingUser) {
-      let message = "User already exists";
-      if (existingUser.email === email) message = "Email already registered";
-      if (existingUser.username === username) message = "Username already taken";
-      if (existingUser.ssn === ssn) message = "SSN already registered";
-      
-      return res.status(409).json({ message });
+      if (existingUser.email === email) {
+        return res.status(409).json({
+          message: "Email already registered",
+        });
+      }
+
+      if (existingUser.username === username) {
+        return res.status(409).json({
+          message: "Username already taken",
+        });
+      }
+
+      if (existingUser.ssn === ssn) {
+        return res.status(409).json({
+          message: "SSN already registered",
+        });
+      }
     }
 
-    // Generate account number
-    
-
-    // Create new user WITHOUT balance field
+    // Create user
     const user = new User({
       firstName,
       lastName,
       email,
-      dateOfBirth: new Date(dateOfBirth),
-      phone,
-      ssn,
-      address: {
-        street1: address1,
-        street2: address2 || "",
-        city,
-        state: state.toUpperCase(),
-        zipCode: zip,
-      },
-      employment: {
-        status: employmentStatus,
-        employer: employer || "",
-        occupation: occupation || "",
-        annualIncome,
-        sourceOfFunds,
-      },
       username,
       password,
-      
+      phone,
+      ssn,
+      accountType,
+
+      dateOfBirth: new Date(dateOfBirth),
+
+      address: {
+        street1: address.street1,
+        street2: address.street2 || "",
+        city: address.city,
+        state: address.state.toUpperCase(),
+        zipCode: address.zipCode,
+      },
+
+      employment: {
+        status: employment.status,
+        employer: employment.employer || "",
+        occupation: employment.occupation || "",
+        annualIncome: employment.annualIncome,
+        sourceOfFunds: employment.sourceOfFunds,
+      },
     });
 
     await user.save();
-    
-    // Create default accounts (balance comes from here)
+
+    // Create default accounts
     const accounts = await Account.createDefaultAccounts(user._id);
 
     // Generate token
     const token = generateToken(user._id);
 
-    // Return success response WITHOUT user.balance
+    // Primary account
+    const primaryAccount = accounts.find((acc) => acc.isPrimary) || accounts[0];
+
     res.status(201).json({
       message: "Account created successfully",
+
       token,
+
+      accountNumber: primaryAccount.accountNumber,
+
+      accountType: user.accountType,
+
+      firstName: user.firstName,
+      lastName: user.lastName,
+      email: user.email,
+
       user: {
         id: user._id,
         username: user.username,
@@ -342,11 +363,12 @@ router.post("/signup", signupValidation, async (req, res) => {
         firstName: user.firstName,
         lastName: user.lastName,
         fullName: user.fullName,
-        createdAt: user.createdAt,
         age: user.age,
         fullAddress: user.fullAddress,
+        createdAt: user.createdAt,
       },
-      accounts: accounts.map(acc => ({
+
+      accounts: accounts.map((acc) => ({
         id: acc._id,
         type: acc.type,
         accountNumber: acc.accountNumber,
@@ -357,21 +379,28 @@ router.post("/signup", signupValidation, async (req, res) => {
     });
   } catch (error) {
     console.error("Signup error:", error);
-    if (error.name === 'ValidationError') {
-      const errors = Object.values(error.errors).map(err => ({
-        field: err.path,
-        message: err.message,
-      }));
-      return res.status(400).json({ message: "Validation failed", errors });
-    }
-    if (error.code === 11000) {
-      const field = Object.keys(error.keyValue)[0];
-      const value = error.keyValue[field];
-      return res.status(409).json({
-        message: `${field} '${value}' already exists`,
+
+    if (error.name === "ValidationError") {
+      return res.status(400).json({
+        message: "Validation failed",
+        errors: Object.values(error.errors).map((err) => ({
+          field: err.path,
+          message: err.message,
+        })),
       });
     }
-    res.status(500).json({ message: "Internal server error" });
+
+    if (error.code === 11000) {
+      const field = Object.keys(error.keyValue)[0];
+
+      return res.status(409).json({
+        message: `${field} already exists`,
+      });
+    }
+
+    res.status(500).json({
+      message: "Internal server error",
+    });
   }
 });
 
