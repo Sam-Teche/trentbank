@@ -1,10 +1,11 @@
 const express = require("express");
 const { validationResult } = require("express-validator");
 const User = require("../models/User");
-const Account = require("../models/Account")
+const Account = require("../models/Account");
 const Transaction = require("../models/Transaction");
 const { authenticateToken } = require("../middleware/auth");
 const { profileUpdateValidation } = require("../middleware/validation");
+const { sendTransferConfirmationEmail } = require("../services/emailService");
 
 const router = express.Router();
 
@@ -69,7 +70,6 @@ router.get("/profile", authenticateToken, async (req, res) => {
   }
 });
 
-
 // Update user profile
 router.put(
   "/profile",
@@ -105,6 +105,14 @@ router.put(
 
       await user.save();
 
+      // NOTE: pre-existing bug — `account` is undefined here. Fetch the
+      // checking account (like /profile does above) before referencing
+      // account.balance, or drop this field if it's not needed in this response.
+      const checkingAccount = await Account.findOne({
+        userId: user._id,
+        type: "checking",
+      });
+
       res.json({
         message: "Profile updated successfully",
         user: {
@@ -116,7 +124,7 @@ router.put(
           fullName: user.fullName,
           accountNumber: user.accountNumber,
           accountType: user.accountType,
-          balance: account.balance,
+          balance: checkingAccount ? checkingAccount.balance : 0,
           isEmailVerified: user.isEmailVerified,
         },
       });
@@ -124,7 +132,7 @@ router.put(
       console.error("Profile update error:", error);
       res.status(500).json({ message: "Internal server error" });
     }
-  }
+  },
 );
 
 // Get account balance
@@ -135,7 +143,6 @@ router.get("/balance", authenticateToken, (req, res) => {
     accountType: req.user.accountType,
   });
 });
-
 
 // Create new transfer transaction
 router.post("/transfer", authenticateToken, async (req, res) => {
@@ -221,6 +228,17 @@ router.post("/transfer", authenticateToken, async (req, res) => {
 
     await transaction.save();
 
+    // Fire-and-forget confirmation email to the account holder.
+    // Uses req.user.email (authenticated user), NOT req.body.email, since
+    // the body's `email` field is the transfer recipient's address, which
+    // is attacker/user-controlled input and shouldn't receive "your
+    // transfer succeeded" confirmations for someone else's account.
+    sendTransferConfirmationEmail({
+      email: req.user.email,
+      firstName: req.user.firstName,
+      transaction,
+    }).catch((err) => console.error("Transfer email error:", err));
+
     res.status(201).json({
       message: "Transfer initiated successfully",
       transaction: {
@@ -236,138 +254,149 @@ router.post("/transfer", authenticateToken, async (req, res) => {
     console.error("Transfer creation error:", error);
     res.status(500).json({
       message: "Failed to initiate transfer",
-      error: error.message
+      error: error.message,
     });
   }
 });
 
 // Update transaction status (for manual completion)
-router.patch("/transaction/:transactionId/status", authenticateToken, async (req, res) => {
-  try {
-    const { transactionId } = req.params;
-    const { status } = req.body;
+router.patch(
+  "/transaction/:transactionId/status",
+  authenticateToken,
+  async (req, res) => {
+    try {
+      const { transactionId } = req.params;
+      const { status } = req.body;
 
-    // Validate status
-    if (!["pending", "completed", "failed"].includes(status)) {
-      return res.status(400).json({
-        message: "Invalid status. Must be: pending, completed, or failed",
-      });
-    }
+      // Validate status
+      if (!["pending", "completed", "failed"].includes(status)) {
+        return res.status(400).json({
+          message: "Invalid status. Must be: pending, completed, or failed",
+        });
+      }
 
-    // Find the transaction
-    const transaction = await Transaction.findOne({
-      _id: transactionId,
-      userId: req.user._id,
-    });
-
-    if (!transaction) {
-      return res.status(404).json({
-        message: "Transaction not found",
-      });
-    }
-
-    const oldStatus = transaction.status;
-    transaction.status = status;
-
-    // If completing a transaction, update checking account balance
-    if (status === "completed" && oldStatus === "pending") {
-      const checkingAccount = await Account.findOne({
+      // Find the transaction
+      const transaction = await Transaction.findOne({
+        _id: transactionId,
         userId: req.user._id,
-        type: "checking",
       });
 
-      if (!checkingAccount) {
-        return res.status(404).json({ message: "Checking account not found" });
+      if (!transaction) {
+        return res.status(404).json({
+          message: "Transaction not found",
+        });
       }
 
-      if (transaction.type === "debit") {
-        checkingAccount.balance -= transaction.amount;
-      } else {
-        checkingAccount.balance += transaction.amount;
+      const oldStatus = transaction.status;
+      transaction.status = status;
+
+      // If completing a transaction, update checking account balance
+      if (status === "completed" && oldStatus === "pending") {
+        const checkingAccount = await Account.findOne({
+          userId: req.user._id,
+          type: "checking",
+        });
+
+        if (!checkingAccount) {
+          return res
+            .status(404)
+            .json({ message: "Checking account not found" });
+        }
+
+        if (transaction.type === "debit") {
+          checkingAccount.balance -= transaction.amount;
+        } else {
+          checkingAccount.balance += transaction.amount;
+        }
+
+        await checkingAccount.save();
       }
 
-      await checkingAccount.save();
-    }
+      // If failing a transaction that was completed, reverse the balance
+      // If failing a transaction that was completed, reverse the balance
+      if (status === "failed" && oldStatus === "completed") {
+        const checkingAccount = await Account.findOne({
+          userId: req.user._id,
+          type: "checking",
+        });
 
-    // If failing a transaction that was completed, reverse the balance
-    // If failing a transaction that was completed, reverse the balance
-    if (status === "failed" && oldStatus === "completed") {
-      const checkingAccount = await Account.findOne({
-        userId: req.user._id,
-        type: "checking",
+        if (!checkingAccount) {
+          return res
+            .status(404)
+            .json({ message: "Checking account not found" });
+        }
+
+        if (transaction.type === "debit") {
+          checkingAccount.balance += transaction.amount;
+        } else {
+          checkingAccount.balance -= transaction.amount;
+        }
+
+        await checkingAccount.save();
+      }
+
+      await transaction.save();
+
+      res.json({
+        message: `Transaction ${status} successfully`,
+        transaction: {
+          id: transaction._id,
+          status: transaction.status,
+          reference: transaction.reference,
+          amount: transaction.amount,
+          description: transaction.description,
+          date: transaction.date,
+        },
       });
-
-      if (!checkingAccount) {
-        return res.status(404).json({ message: "Checking account not found" });
-      }
-
-      if (transaction.type === "debit") {
-        checkingAccount.balance += transaction.amount;
-      } else {
-        checkingAccount.balance -= transaction.amount;
-      }
-
-      await checkingAccount.save();
+    } catch (error) {
+      console.error("Transaction status update error:", error);
+      res.status(500).json({
+        message: "Failed to update transaction status",
+        error: error.message,
+      });
     }
-
-    await transaction.save(); 
-
-    res.json({
-      message: `Transaction ${status} successfully`,
-      transaction: {
-        id: transaction._id,
-        status: transaction.status,
-        reference: transaction.reference,
-        amount: transaction.amount,
-        description: transaction.description,
-        date: transaction.date,
-      },
-    });
-  } catch (error) {
-    console.error("Transaction status update error:", error);
-    res.status(500).json({
-      message: "Failed to update transaction status",
-      error: error.message
-    });
-  }
-});
+  },
+);
 
 // Get single transaction details
-router.get("/transaction/:transactionId", authenticateToken, async (req, res) => {
-  try {
-    const { transactionId } = req.params;
+router.get(
+  "/transaction/:transactionId",
+  authenticateToken,
+  async (req, res) => {
+    try {
+      const { transactionId } = req.params;
 
-    const transaction = await Transaction.findOne({
-      _id: transactionId,
-      userId: req.user._id
-    }).lean();
+      const transaction = await Transaction.findOne({
+        _id: transactionId,
+        userId: req.user._id,
+      }).lean();
 
-    if (!transaction) {
-      return res.status(404).json({
-        message: "Transaction not found"
+      if (!transaction) {
+        return res.status(404).json({
+          message: "Transaction not found",
+        });
+      }
+
+      res.json({
+        transaction: {
+          id: transaction._id,
+          type: transaction.type,
+          amount: transaction.amount,
+          description: transaction.description,
+          status: transaction.status,
+          date: transaction.date,
+          reference: transaction.reference,
+          metadata: transaction.metadata || {},
+        },
+      });
+    } catch (error) {
+      console.error("Transaction fetch error:", error);
+      res.status(500).json({
+        message: "Failed to fetch transaction",
+        error: error.message,
       });
     }
-
-    res.json({
-      transaction: {
-        id: transaction._id,
-        type: transaction.type,
-        amount: transaction.amount,
-        description: transaction.description,
-        status: transaction.status,
-        date: transaction.date,
-        reference: transaction.reference,
-        metadata: transaction.metadata || {}
-      }
-    });
-
-  } catch (error) {
-    console.error("Transaction fetch error:", error);
-    res.status(500).json({
-      message: "Failed to fetch transaction",
-      error: error.message
-    });
-  }
-});
+  },
+);
 
 module.exports = router;
