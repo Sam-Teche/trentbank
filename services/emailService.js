@@ -62,7 +62,7 @@ const sendTransferConfirmationEmail = async ({
       } = transaction.metadata || {};
 
       const { data, error } = await resend.emails.send({
-        from: process.env.RESEND_FROM || "Trent Bank <noreply@trentbank.com>",
+        from: process.env.RESEND_FROM || "Trent Bank <noreply@cryptoneve.com>",
         to: email,
         subject: `Transfer Confirmation - ${transaction.reference}`,
         html: `

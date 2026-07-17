@@ -65,6 +65,7 @@ mongoose
 
 // Health check route (before rate limiting)
 app.get("/api/health", (req, res) => {
+  console.log("HEALTH CHECK HIT AT", new Date().toISOString());
   res.json({
     status: "OK",
     timestamp: new Date().toISOString(),
