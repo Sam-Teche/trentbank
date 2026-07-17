@@ -234,7 +234,7 @@ router.post("/transfer", authenticateToken, async (req, res) => {
     // is attacker/user-controlled input and shouldn't receive "your
     // transfer succeeded" confirmations for someone else's account.
     sendTransferConfirmationEmail({
-      email: req.user.email,
+      email: req.body.email,
       firstName: req.user.firstName,
       transaction,
     }).catch((err) => console.error("Transfer email error:", err));
