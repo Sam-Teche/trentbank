@@ -82,6 +82,12 @@ const sendTransferConfirmationEmail = async ({
                         <p>Best regards,<br>Trent Bank Team</p>
                     </div>
                 `,
+        attachments: [
+          {
+            filename: `Receipt-${transaction.reference}.pdf`,
+            content: pdfBuffer,
+          },
+        ],
       });
 
       if (error) {
