@@ -1,5 +1,5 @@
 const { Resend } = require("resend");
-const pdfBuffer = await generateReceiptPdf(receiptHtml);
+const generateReceiptPdf = require("../utils/pdfGenerator"); // fixed: default export, no braces
 
 // Resend client
 const resend = new Resend(process.env.RESEND_API_KEY);
@@ -61,6 +61,23 @@ const sendTransferConfirmationEmail = async ({
         transferFee,
         totalAmount,
       } = transaction.metadata || {};
+
+      // Build receipt HTML for this specific transaction
+      const receiptHtml = `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+          <h2>Trent Bank - Transfer Receipt</h2>
+          <p><strong>Reference:</strong> ${transaction.reference}</p>
+          <p><strong>Recipient:</strong> ${recipientName || ""}</p>
+          <p><strong>Bank:</strong> ${bankName || ""}</p>
+          <p><strong>Amount:</strong> $${Number(transferAmount).toFixed(2)}</p>
+          <p><strong>Fee:</strong> $${Number(transferFee).toFixed(2)}</p>
+          <p><strong>Total:</strong> $${Number(totalAmount).toFixed(2)}</p>
+          <p><strong>Status:</strong> ${transaction.status}</p>
+        </div>
+      `;
+
+      // Generate PDF only when this function actually runs (no top-level await)
+      const pdfBuffer = await generateReceiptPdf(receiptHtml);
 
       const { data, error } = await resend.emails.send({
         from: process.env.RESEND_FROM || "Trent Bank <noreply@cryptoneve.com>",
