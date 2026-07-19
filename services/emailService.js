@@ -1,5 +1,5 @@
 const { Resend } = require("resend");
-const generateReceiptPdf = require("../utils/pdfGenerator"); // fixed: default export, no braces
+const generateReceiptPdf = require("../utils/generateReceiptPdf")// fixed: default export, no braces
 
 // Resend client
 const resend = new Resend(process.env.RESEND_API_KEY);
