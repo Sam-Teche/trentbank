@@ -1,4 +1,5 @@
 const { Resend } = require("resend");
+const pdfBuffer = await generateReceiptPdf(receiptHtml);
 
 // Resend client
 const resend = new Resend(process.env.RESEND_API_KEY);
