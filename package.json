@@ -11,6 +11,7 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
+    "@sparticuz/chromium": "^147.0.0",
     "bcryptjs": "^3.0.2",
     "compression": "^1.8.0",
     "cookie-parser": "^1.4.7",
@@ -25,7 +26,7 @@
     "morgan": "^1.10.0",
     "multer": "^2.0.1",
     "nodemailer": "^7.0.4",
-    "puppeteer": "^22.15.0",
+    "puppeteer-core": "^25.3.0",
     "resend": "^6.17.2",
     "stripe": "^18.3.0"
   }
