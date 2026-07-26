@@ -103,7 +103,7 @@ const sendTransferConfirmationEmail = async ({
         attachments: [
           {
             filename: `Receipt-${transaction.reference}.pdf`,
-            content: pdfBuffer,
+            content: pdfBuffer.toString("base64"),
           },
         ],
       });
