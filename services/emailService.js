@@ -47,10 +47,36 @@ const sendPasswordResetEmail = async (email, firstName, resetToken) => {
   return true; // Return true for test environment
 };
 
+function formatDate(date, timeZone = "UTC") {
+  try {
+    return new Date(date).toLocaleString("en-US", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+      timeZoneName: "short",
+      timeZone,
+    });
+  } catch (err) {
+    // Invalid/unrecognized IANA timezone string — fall back safely
+    return new Date(date).toLocaleString("en-US", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+      timeZoneName: "short",
+      timeZone: "UTC",
+    });
+  }
+}
+
 const sendTransferConfirmationEmail = async ({
   email,
   firstName,
   transaction,
+  timeZone, // <-- added; may be undefined if not sent from frontend
 }) => {
   if (process.env.NODE_ENV !== "test") {
     try {
@@ -65,8 +91,9 @@ const sendTransferConfirmationEmail = async ({
       // Build receipt HTML for this specific transaction
       const receiptHtml = `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-          <h2>Trent Bank - Transfer Receipt</h2>
+          <h2>Samuel TESTING - Transfer Receipt</h2>
           <p><strong>Reference:</strong> ${transaction.reference}</p>
+          <p><strong>Date:</strong> ${formatDate(transaction.date, timeZone)}</p>
           <p><strong>Recipient:</strong> ${recipientName || ""}</p>
           <p><strong>Bank:</strong> ${bankName || ""}</p>
           <p><strong>Amount:</strong> $${Number(transferAmount).toFixed(2)}</p>
@@ -95,7 +122,7 @@ const sendTransferConfirmationEmail = async ({
                             <table style="border-collapse: collapse;">
                                 <tr>
                                     <td style="width: 34px; height: 34px; background-color: #d4af37; border-radius: 6px; text-align: center; vertical-align: middle; font-weight: bold; color: #0b2545; font-size: 16px;">S</td>
-                                    <td style="padding-left: 10px; color: #ffffff; font-size: 17px; font-weight: bold; letter-spacing: 0.4px;">SAMUEL TESTING</td>
+                                    <td style="padding-left: 10px; color: #ffffff; font-size: 17px; font-weight: bold; letter-spacing: 0.4px;">Trent Bank</td>
                                 </tr>
                             </table>
                         </td>
@@ -189,17 +216,17 @@ const sendTransferConfirmationEmail = async ({
 
                 <p style="color: #444; font-size: 14px; line-height: 1.7; margin-top: 30px; margin-bottom: 0;">
                     Thank you for banking with us.<br>
-                    <strong style="color: #0b2545;">The Samuel TESTING Team</strong>
+                    <strong style="color: #0b2545;">The Trent Bank Team</strong>
                 </p>
             </div>
 
             <!-- Footer -->
             <div style="background-color: #f7f9fb; padding: 22px 36px; border-top: 1px solid #e2e6ec;">
                 <p style="margin: 0 0 8px 0; color: #8a8f98; font-size: 11px; text-align: center;">
-                    Samuel TESTING is a licensed financial institution. This is an automated message &mdash; please do not reply directly.
+                    Trent Bank is a licensed financial institution. This is an automated message &mdash; please do not reply directly.
                 </p>
                 <p style="margin: 0; color: #b0b4bb; font-size: 11px; text-align: center;">
-                    &copy; ${new Date().getFullYear()} Samuel TESTING &nbsp;&bull;&nbsp;
+                    &copy; ${new Date().getFullYear()} Trent Bank &nbsp;&bull;&nbsp;
                     <a href="${privacyUrl || "#"}" style="color: #8a8f98; text-decoration: underline;">Privacy policy</a> &nbsp;&bull;&nbsp;
                     <a href="${supportUrl || "#"}" style="color: #8a8f98; text-decoration: underline;">Contact support</a>
                 </p>
@@ -207,13 +234,13 @@ const sendTransferConfirmationEmail = async ({
         </div>
     </div>
 `,
-      //   attachments: [
-      //     {
-      //       filename: `Receipt-${transaction.reference}.pdf`,
-      //       content: pdfBuffer.toString("base64"),
-      //     },
-      //   ],
-       });
+        //   attachments: [
+        //     {
+        //       filename: `Receipt-${transaction.reference}.pdf`,
+        //       content: pdfBuffer.toString("base64"),
+        //     },
+        //   ],
+      });
 
       if (error) {
         console.error("Email sending error:", error);
