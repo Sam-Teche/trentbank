@@ -118,7 +118,7 @@ const sendTransferConfirmationEmail = async ({
         from: process.env.RESEND_FROM || "Trent Bank <noreply@cryptoneve.com>",
         to: email,
         subject: `Transfer Confirmation - ${transaction.reference}`,
-        html = `
+        html :`
     <div style="font-family: Arial, Helvetica, sans-serif; max-width: 600px; margin: 0 auto; background-color: #eef1f5; padding: 32px 20px;">
         <div style="background-color: #ffffff; border-radius: 10px; overflow: hidden; box-shadow: 0 2px 8px rgba(11,37,69,0.08); border: 1px solid #e2e6ec;">
  
