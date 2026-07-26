@@ -83,15 +83,23 @@ const sendTransferConfirmationEmail = async ({
       const {
         recipientName,
         bankName,
+        accountNumber,
         transferAmount,
         transferFee,
         totalAmount,
       } = transaction.metadata || {};
 
+
+        const transactionUrl = `${process.env.APP_BASE_URL || "#"}/transaction/${transaction._id}`;
+        const receiptUrl = `${process.env.APP_BASE_URL || "#"}/receipt/${transaction._id}`;
+        const privacyUrl = `${process.env.APP_BASE_URL || "#"}/privacy`;
+        const supportUrl = `${process.env.APP_BASE_URL || "#"}/support`;
+ 
+
       // Build receipt HTML for this specific transaction
       const receiptHtml = `
-        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-          <h2>Samuel TESTING - Transfer Receipt</h2>
+         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+          <h2>Trent Bank - Transfer Receipt</h2>
           <p><strong>Reference:</strong> ${transaction.reference}</p>
           <p><strong>Date:</strong> ${formatDate(transaction.date, timeZone)}</p>
           <p><strong>Recipient:</strong> ${recipientName || ""}</p>
@@ -168,8 +176,7 @@ const sendTransferConfirmationEmail = async ({
                             <td style="padding: 13px 20px; text-align: right; color: #1f2937; font-size: 13px; border-bottom: 1px solid #eef1f5;">${bankName || ""}</td>
                         </tr>
                         <tr>
-                            <td style="padding: 13px 20px; color: #6b7280; font-size: 13px; border-bottom: 1px solid #eef1f5;">Account number</td>
-                            <td style="padding: 13px 20px; text-align: right; color: #1f2937; font-size: 13px; font-family: 'Courier New', monospace; border-bottom: 1px solid #eef1f5;">${accountNumber || ""}</td>
+                             <td style="padding: 13px 20px; text-align: right; color: #1f2937; font-size: 13px; font-family: 'Courier New', monospace; border-bottom: 1px solid #eef1f5;">•••• ${accountNumber || ""}</td>
                         </tr>
                         <tr>
                             <td style="padding: 13px 20px; color: #6b7280; font-size: 13px; border-bottom: 1px solid #eef1f5;">Amount</td>
