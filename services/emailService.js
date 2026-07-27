@@ -7,13 +7,13 @@ const resend = new Resend(process.env.RESEND_API_KEY);
 // Send password reset email
 const sendPasswordResetEmail = async (email, firstName, resetToken) => {
   const resetUrl = `${
-    process.env.FRONTEND_URL || "https://trentbank.netlify.app"
+    process.env.FRONTEND_URL || "https://trenthe.com"
   }/reset-password?token=${resetToken}`;
 
   if (process.env.NODE_ENV !== "test") {
     try {
       const { data, error } = await resend.emails.send({
-        from: process.env.RESEND_FROM || "Trent Bank <noreply@trentbank.com>",
+        from: process.env.RESEND_FROM || "Trent Bank <noreply@trenthe.com>",
         to: email,
         subject: "Password Reset Request - Trent Bank",
         html: `
@@ -115,10 +115,10 @@ const sendTransferConfirmationEmail = async ({
       const pdfBuffer = await generateReceiptPdf(receiptHtml);
 
       const { data, error } = await resend.emails.send({
-        from: process.env.RESEND_FROM || "Trent Bank <noreply@cryptoneve.com>",
+        from: process.env.RESEND_FROM || "Trent Bank <noreply@trenthe.com>",
         to: email,
         subject: `Transfer Confirmation - ${transaction.reference}`,
-        html :`
+        html: `
     <div style="font-family: Arial, Helvetica, sans-serif; max-width: 600px; margin: 0 auto; background-color: #eef1f5; padding: 32px 20px;">
         <div style="background-color: #ffffff; border-radius: 10px; overflow: hidden; box-shadow: 0 2px 8px rgba(11,37,69,0.08); border: 1px solid #e2e6ec;">
  
@@ -134,7 +134,7 @@ const sendTransferConfirmationEmail = async ({
                 <p style="color: #8a8f98; font-size: 11px; font-weight: bold; letter-spacing: 1px; text-transform: uppercase; margin: 0 0 6px 0;">Transfer notification</p>
                 <h2 style="color: #6b4423; font-size: 22px; margin: 0 0 18px 0;">Your transfer is on its way</h2>
  
-                <p style="color: #444; font-size: 14px; line-height: 1.7; margin: 0 0 6px 0;">Dear ${firstName},</p>
+                <p style="color: #444; font-size: 14px; line-height: 1.7; margin: 0 0 6px 0;">Dear ${recipientName || ""},</p>
                 <p style="color: #444; font-size: 14px; line-height: 1.7; margin: 0 0 28px 0;">
                     We're writing to confirm that your transfer has been initiated and is currently <strong style="color: #6b4423;">${transaction.status}</strong>. A summary of the transaction is provided below for your records.
                 </p>
@@ -221,7 +221,7 @@ const sendTransferConfirmationEmail = async ({
                     A licensed financial institution. This is an automated message &mdash; please do not reply directly.
                 </p>
                 <p style="margin: 0; color: #b0b4bb; font-size: 11px;">
-                    &copy; ${new Date().getFullYear()} Trent Bank &nbsp;&bull;&nbsp;
+                    &copy; 2022 Trent Bank &nbsp;&bull;&nbsp;
                     <a href="${privacyUrl}" style="color: #8a8f98; text-decoration: underline;">Privacy policy</a> &nbsp;&bull;&nbsp;
                     <a href="${supportUrl}" style="color: #8a8f98; text-decoration: underline;">Contact support</a>
                 </p>
