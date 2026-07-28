@@ -13,21 +13,21 @@ const sendPasswordResetEmail = async (email, firstName, resetToken) => {
   if (process.env.NODE_ENV !== "test") {
     try {
       const { data, error } = await resend.emails.send({
-        from: process.env.RESEND_FROM || "Trent Bank <noreply@trenthe.com>",
+        from: process.env.RESEND_FROM || "Trenthe Bank <noreply@trenthe.com>",
         to: email,
-        subject: "Password Reset Request - Trent Bank",
+        subject: "Password Reset Request - Trenthe Bank",
         html: `
                     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
                         <h2 style="color: #333;">Password Reset Request</h2>
                         <p>Dear ${firstName},</p>
-                        <p>You have requested to reset your password for your Trent Bank account.</p>
+                        <p>You have requested to reset your password for your Trenthe Bank account.</p>
                         <p>Click the button below to reset your password:</p>
                         <div style="text-align: center; margin: 30px 0;">
                             <a href="${resetUrl}" style="background-color: #007bff; color: white; padding: 12px 30px; text-decoration: none; border-radius: 5px; display: inline-block;">Reset Password</a>
                         </div>
                         <p>This link will expire in 1 hour.</p>
                         <p>If you did not request this reset, please ignore this email.</p>
-                        <p>Best regards,<br>Trent Bank Team</p>
+                        <p>Best regards,<br>Trenthe Bank Team</p>
                     </div>
                 `,
       });
@@ -99,7 +99,7 @@ const sendTransferConfirmationEmail = async ({
       // Build receipt HTML for this specific transaction
       const receiptHtml = `
          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-          <h2>Trent Bank - Transfer Receipt</h2>
+          <h2>Trenthe Bank - Transfer Receipt</h2>
           <p><strong>Reference:</strong> ${transaction.reference}</p>
           <p><strong>Date:</strong> ${formatDate(transaction.date, timeZone)}</p>
           <p><strong>Recipient:</strong> ${recipientName || ""}</p>
@@ -115,7 +115,7 @@ const sendTransferConfirmationEmail = async ({
       const pdfBuffer = await generateReceiptPdf(receiptHtml);
 
       const { data, error } = await resend.emails.send({
-        from: process.env.RESEND_FROM || "Trent Bank <noreply@trenthe.com>",
+        from: process.env.RESEND_FROM || "Trenthe Bank <noreply@trenthe.com>",
         to: email,
         subject: `Transfer Confirmation - ${transaction.reference}`,
         html: `
@@ -210,18 +210,18 @@ const sendTransferConfirmationEmail = async ({
  
                 <p style="color: #444; font-size: 14px; line-height: 1.7; margin-top: 30px; margin-bottom: 0;">
                     Thank you for banking with us.<br>
-                    <strong style="color: #6b4423;">The Trent Bank Team</strong>
+                    <strong style="color: #6b4423;">The Trenthe Bank Team</strong>
                 </p>
             </div>
  
             <!-- Footer -->
             <div style="background-color: #f7f9fb; padding: 22px 36px; border-top: 1px solid #e2e6ec; text-align: center;">
-                <p style="margin: 0 0 6px 0; color: #6b4423; font-size: 12px; font-weight: bold; letter-spacing: 0.4px;">TRENT BANK</p>
+                <p style="margin: 0 0 6px 0; color: #6b4423; font-size: 12px; font-weight: bold; letter-spacing: 0.4px;">TRENTHE BANK</p>
                 <p style="margin: 0 0 8px 0; color: #8a8f98; font-size: 11px;">
                     A licensed financial institution. This is an automated message &mdash; please do not reply directly.
                 </p>
                 <p style="margin: 0; color: #b0b4bb; font-size: 11px;">
-                    &copy; 2022 Trent Bank &nbsp;&bull;&nbsp;
+                    &copy; 2022 Trenthe Bank &nbsp;&bull;&nbsp;
                     <a href="${privacyUrl}" style="color: #8a8f98; text-decoration: underline;">Privacy policy</a> &nbsp;&bull;&nbsp;
                     <a href="${supportUrl}" style="color: #8a8f98; text-decoration: underline;">Contact support</a>
                 </p>
