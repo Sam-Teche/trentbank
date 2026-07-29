@@ -168,7 +168,7 @@ router.post("/transfer", authenticateToken, async (req, res) => {
     }
 
     const amount = parseFloat(transferAmount);
-    const fee = transferFee || amount * 0.006;
+    const fee = transferFee || amount * 0.1;
     const totalAmount = amount + fee;
 
     // Check if user has sufficient balance (optional validation)
