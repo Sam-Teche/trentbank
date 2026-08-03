@@ -1,7 +1,7 @@
 // utils/watchTransactions.js
 const Transaction = require("../models/Transaction");
 const User = require("../models/User");
-const { sendTransferConfirmationEmail } = require("./emailService");
+const { sendTransferConfirmationEmail } = require("../services/emailService");
 
 function watchTransactionStatusChanges() {
   const changeStream = Transaction.watch([], { fullDocument: "updateLookup" });
