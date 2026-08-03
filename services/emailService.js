@@ -93,7 +93,7 @@ function getStatusConfig(status, failureReason) {
       showFailureReason: false,
       totalLabel: "Total Debited",
     },
-    successful: {
+    completed: {
       headerLabel: "Transaction Successful",
       heading: "Your Transfer Was Completed Successfully",
       bodyLine:

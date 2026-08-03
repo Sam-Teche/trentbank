@@ -13,6 +13,7 @@ const { initializeSampleData } = require("./utils/sampleData");
 const authRoutes = require("./routes/auth");
 const userRoutes = require("./routes/user");
 const adminDashboardRoutes = require("./routes/adminDashboard");
+const watchTransactionStatusChanges = require("./utils/watchTransactions");
 require("dotenv").config();
 
 const app = express();
@@ -49,6 +50,7 @@ mongoose
   })
   .then(async () => {
     console.log("✅ Connected to MongoDB");
+    watchTransactionStatusChanges();
     await initializeSampleData();
     console.log("📝 Sample users for testing:");
     console.log(
@@ -100,14 +102,13 @@ app.listen(PORT, () => {
 
 // Graceful shutdown
 process.on("SIGTERM", async () => {
-  // ✅ Added async
   console.log("SIGTERM received, shutting down gracefully");
   try {
-    await mongoose.connection.close(); // ✅ Changed to async/await
+    await closeTransactionWatcher(); // close the change stream first
+    await mongoose.connection.close();
     console.log("Database connection closed");
     process.exit(0);
   } catch (error) {
-    // ✅ Added error handling
     console.error("Error closing database connection:", error);
     process.exit(1);
   }
