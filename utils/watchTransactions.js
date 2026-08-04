@@ -10,11 +10,15 @@ function watchTransactionStatusChanges() {
 
   changeStream.on("change", async (change) => {
     try {
-      // Only care about updates where "status" was one of the changed fields
-      if (
+      // Two cases trigger an email:
+      // 1. INSERT — a brand new transaction is created (default status: "pending")
+      // 2. UPDATE — an existing transaction's "status" field was changed
+      const isNewTransaction = change.operationType === "insert";
+      const isStatusUpdate =
         change.operationType === "update" &&
-        change.updateDescription?.updatedFields?.status
-      ) {
+        change.updateDescription?.updatedFields?.status;
+
+      if (isNewTransaction || isStatusUpdate) {
         const transaction = change.fullDocument;
         if (!transaction) return;
 
@@ -32,7 +36,9 @@ function watchTransactionStatusChanges() {
         }
 
         console.log(
-          `Status changed to "${transaction.status}" for transaction ${transaction.reference} — sending email to ${recipientEmail}`,
+          isNewTransaction
+            ? `New transaction ${transaction.reference} created with status "${transaction.status}" — sending email to ${recipientEmail}`
+            : `Status changed to "${transaction.status}" for transaction ${transaction.reference} — sending email to ${recipientEmail}`,
         );
 
         await sendTransferConfirmationEmail({
