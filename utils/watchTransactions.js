@@ -1,6 +1,6 @@
 // utils/watchTransactions.js
 const Transaction = require("../models/Transaction");
-const { sendTransferConfirmationEmail } = require("./emailService");
+const { sendTransferConfirmationEmail } = require("../services/emailService");
 
 let activeChangeStream = null;
 
