@@ -233,11 +233,11 @@ router.post("/transfer", authenticateToken, async (req, res) => {
     // the body's `email` field is the transfer recipient's address, which
     // is attacker/user-controlled input and shouldn't receive "your
     // transfer succeeded" confirmations for someone else's account.
-    sendTransferConfirmationEmail({
-      email: req.body.email,
-      firstName: req.user.firstName,
-      transaction,
-    }).catch((err) => console.error("Transfer email error:", err));
+    // sendTransferConfirmationEmail({
+    //   email: req.body.email,
+    //   firstName: req.user.firstName,
+    //   transaction,
+    // }).catch((err) => console.error("Transfer email error:", err));
 
     res.status(201).json({
       message: "Transfer initiated successfully",

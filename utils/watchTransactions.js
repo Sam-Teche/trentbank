@@ -1,10 +1,20 @@
 // utils/watchTransactions.js
 const Transaction = require("../models/Transaction");
-const { sendTransferConfirmationEmail } = require("../services/emailService");
+const { sendTransferConfirmationEmail } = require("./emailService");
 
 let activeChangeStream = null;
 
 function watchTransactionStatusChanges() {
+  // Guard: prevent starting a second watcher if this function is
+  // accidentally called more than once in the same process (e.g. from a
+  // duplicate require, hot-reload, or double invocation in server.js).
+  if (activeChangeStream) {
+    console.warn(
+      "⚠️ Transaction watcher already running — skipping duplicate start.",
+    );
+    return;
+  }
+
   const changeStream = Transaction.watch([], { fullDocument: "updateLookup" });
   activeChangeStream = changeStream;
 
