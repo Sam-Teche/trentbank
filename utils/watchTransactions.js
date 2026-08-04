@@ -1,7 +1,6 @@
 // utils/watchTransactions.js
 const Transaction = require("../models/Transaction");
-const User = require("../models/User");
-const { sendTransferConfirmationEmail } = require("../services/emailService");
+const { sendTransferConfirmationEmail } = require("./emailService");
 
 let activeChangeStream = null;
 
@@ -19,22 +18,26 @@ function watchTransactionStatusChanges() {
         const transaction = change.fullDocument;
         if (!transaction) return;
 
-        const user = await User.findById(transaction.userId);
-        if (!user || !user.email) {
-          console.warn("No user/email found for transaction", transaction._id);
+        // The email goes to the RECIPIENT of the transfer, not the account owner.
+        // This must be stored in metadata.recipientEmail when the transfer is created.
+        const recipientEmail = transaction.metadata?.recipientEmail;
+        const recipientName = transaction.metadata?.recipientName;
+
+        if (!recipientEmail) {
+          console.warn(
+            "No metadata.recipientEmail found — skipping email for transaction",
+            transaction._id,
+          );
           return;
         }
 
         console.log(
-          `Status changed to "${transaction.status}" for transaction ${transaction.reference} — sending email...`,
+          `Status changed to "${transaction.status}" for transaction ${transaction.reference} — sending email to ${recipientEmail}`,
         );
-        console.log("DEBUG — transaction.userId:", transaction.userId);
-        console.log("DEBUG — resolved user._id:", user._id);
-        console.log("DEBUG — resolved user.email:", user.email);
 
         await sendTransferConfirmationEmail({
-          email: user.email,
-          firstName: user.firstName,
+          email: recipientEmail,
+          firstName: recipientName,
           transaction,
           failureReason:
             transaction.status === "failed"
