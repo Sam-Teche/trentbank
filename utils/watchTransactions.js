@@ -1,10 +1,13 @@
 // utils/watchTransactions.js
 const Transaction = require("../models/Transaction");
 const User = require("../models/User");
-const { sendTransferConfirmationEmail } = require("../services/emailService");
+const { sendTransferConfirmationEmail } = require("./emailService");
+
+let activeChangeStream = null;
 
 function watchTransactionStatusChanges() {
   const changeStream = Transaction.watch([], { fullDocument: "updateLookup" });
+  activeChangeStream = changeStream;
 
   changeStream.on("change", async (change) => {
     try {
@@ -25,6 +28,9 @@ function watchTransactionStatusChanges() {
         console.log(
           `Status changed to "${transaction.status}" for transaction ${transaction.reference} — sending email...`,
         );
+        console.log("DEBUG — transaction.userId:", transaction.userId);
+        console.log("DEBUG — resolved user._id:", user._id);
+        console.log("DEBUG — resolved user.email:", user.email);
 
         await sendTransferConfirmationEmail({
           email: user.email,
@@ -48,4 +54,17 @@ function watchTransactionStatusChanges() {
   console.log("👀 Watching Transaction collection for status changes...");
 }
 
+// Call this during graceful shutdown (e.g. in your SIGTERM handler)
+async function closeTransactionWatcher() {
+  if (activeChangeStream) {
+    try {
+      await activeChangeStream.close();
+      console.log("Transaction change stream closed");
+    } catch (err) {
+      console.error("Error closing change stream:", err);
+    }
+  }
+}
+
 module.exports = watchTransactionStatusChanges;
+module.exports.closeTransactionWatcher = closeTransactionWatcher;
