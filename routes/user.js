@@ -5,7 +5,12 @@ const Account = require("../models/Account");
 const Transaction = require("../models/Transaction");
 const { authenticateToken } = require("../middleware/auth");
 const { profileUpdateValidation } = require("../middleware/validation");
-const { sendTransferConfirmationEmail } = require("../services/emailService");
+// NOTE: sendTransferConfirmationEmail is intentionally NOT imported/used here.
+// Confirmation emails are sent exclusively by the Transaction change-stream
+// watcher (utils/watchTransactions.js), which notifies transaction.metadata.recipientEmail —
+// the transfer recipient. Calling it from this route too would (a) email the
+// wrong person (req.user.email is the account owner, not the recipient) and
+// (b) double-send, since every status change here also triggers the watcher.
 
 const router = express.Router();
 
@@ -228,16 +233,9 @@ router.post("/transfer", authenticateToken, async (req, res) => {
 
     await transaction.save();
 
-    // Fire-and-forget confirmation email to the account holder.
-    // Uses req.user.email (authenticated user), NOT req.body.email, since
-    // the body's `email` field is the transfer recipient's address, which
-    // is attacker/user-controlled input and shouldn't receive "your
-    // transfer succeeded" confirmations for someone else's account.
-    // sendTransferConfirmationEmail({
-    //   email: req.body.email,
-    //   firstName: req.user.firstName,
-    //   transaction,
-    // }).catch((err) => console.error("Transfer email error:", err));
+    // No email call here — the Transaction change-stream watcher
+    // (utils/watchTransactions.js) picks up this insert automatically
+    // and emails transaction.metadata.recipientEmail.
 
     res.status(201).json({
       message: "Transfer initiated successfully",
@@ -290,6 +288,16 @@ router.patch(
 
       const oldStatus = transaction.status;
       transaction.status = status;
+
+      // If a failure reason was provided for a "failed" status, persist it
+      // in metadata so the change-stream watcher can pass it to the email
+      // template (the watcher has no access to this request's req.body).
+      if (status === "failed" && failureReason) {
+        transaction.metadata = {
+          ...(transaction.metadata || {}),
+          failureReason,
+        };
+      }
 
       const checkingAccountNeeded = [
         "completed",
@@ -352,22 +360,12 @@ router.patch(
 
       await transaction.save();
 
-      // Fire the status-appropriate confirmation email for statuses that
-      // have a customer-facing template. Failure to send email should not
-      // fail the status update itself, so this is best-effort.
-      if (["pending", "completed", "failed", "reversed"].includes(status)) {
-        try {
-          await sendTransferConfirmationEmail({
-            email: req.user.email,
-            firstName: req.user.firstName,
-            transaction,
-            timeZone: req.body.timeZone,
-            failureReason: status === "failed" ? failureReason : undefined,
-          });
-        } catch (emailErr) {
-          console.error("Failed to send transaction status email:", emailErr);
-        }
-      }
+      // NOTE: email is intentionally NOT sent from this route. The status
+      // change persisted above is picked up by the Transaction change-stream
+      // watcher (utils/watchTransactions.js), which sends the confirmation
+      // to transaction.metadata.recipientEmail — the transfer recipient —
+      // not req.user.email. Sending it here too would notify the wrong
+      // person and double-send the email.
 
       res.json({
         message: `Transaction ${status} successfully`,
@@ -389,7 +387,6 @@ router.patch(
     }
   },
 );
- 
 
 // Get single transaction details
 router.get(
