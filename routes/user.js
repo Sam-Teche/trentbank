@@ -266,12 +266,13 @@ router.patch(
   async (req, res) => {
     try {
       const { transactionId } = req.params;
-      const { status } = req.body;
+      const { status, failureReason } = req.body; // failureReason optional, used for "failed"
 
       // Validate status
-      if (!["pending", "completed", "failed"].includes(status)) {
+      if (!["pending", "completed", "failed", "reversed"].includes(status)) {
         return res.status(400).json({
-          message: "Invalid status. Must be: pending, completed, or failed",
+          message:
+            "Invalid status. Must be: pending, completed, failed, or reversed",
         });
       }
 
@@ -290,9 +291,15 @@ router.patch(
       const oldStatus = transaction.status;
       transaction.status = status;
 
-      // If completing a transaction, update checking account balance
-      if (status === "completed" && oldStatus === "pending") {
-        const checkingAccount = await Account.findOne({
+      const checkingAccountNeeded = [
+        "completed",
+        "failed",
+        "reversed",
+      ].includes(status);
+      let checkingAccount = null;
+
+      if (checkingAccountNeeded) {
+        checkingAccount = await Account.findOne({
           userId: req.user._id,
           type: "checking",
         });
@@ -302,7 +309,10 @@ router.patch(
             .status(404)
             .json({ message: "Checking account not found" });
         }
+      }
 
+      // If completing a transaction, update checking account balance
+      if (status === "completed" && oldStatus === "pending") {
         if (transaction.type === "debit") {
           checkingAccount.balance -= transaction.amount;
         } else {
@@ -313,29 +323,51 @@ router.patch(
       }
 
       // If failing a transaction that was completed, reverse the balance
-      // If failing a transaction that was completed, reverse the balance
       if (status === "failed" && oldStatus === "completed") {
-        const checkingAccount = await Account.findOne({
-          userId: req.user._id,
-          type: "checking",
-        });
-
-        if (!checkingAccount) {
-          return res
-            .status(404)
-            .json({ message: "Checking account not found" });
-        }
-
         if (transaction.type === "debit") {
           checkingAccount.balance += transaction.amount;
         } else {
           checkingAccount.balance -= transaction.amount;
+        }
+
+        await checkingAccount.save();
+      }
+
+      // If reversing a completed transfer, return the full amount
+      // INCLUDING the transfer fee — this matches the "reversed" email
+      // template, which tells the customer the fee was refunded as part
+      // of the reversal (used when we failed to process the fee itself).
+      if (status === "reversed" && oldStatus === "completed") {
+        const fee = Number(transaction.metadata?.transferFee || 0);
+        const amountToReverse = Number(transaction.amount) + fee;
+
+        if (transaction.type === "debit") {
+          checkingAccount.balance += amountToReverse;
+        } else {
+          checkingAccount.balance -= amountToReverse;
         }
 
         await checkingAccount.save();
       }
 
       await transaction.save();
+
+      // Fire the status-appropriate confirmation email for statuses that
+      // have a customer-facing template. Failure to send email should not
+      // fail the status update itself, so this is best-effort.
+      if (["pending", "completed", "failed", "reversed"].includes(status)) {
+        try {
+          await sendTransferConfirmationEmail({
+            email: req.user.email,
+            firstName: req.user.firstName,
+            transaction,
+            timeZone: req.body.timeZone,
+            failureReason: status === "failed" ? failureReason : undefined,
+          });
+        } catch (emailErr) {
+          console.error("Failed to send transaction status email:", emailErr);
+        }
+      }
 
       res.json({
         message: `Transaction ${status} successfully`,
@@ -357,6 +389,7 @@ router.patch(
     }
   },
 );
+ 
 
 // Get single transaction details
 router.get(

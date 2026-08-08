@@ -123,6 +123,21 @@ function getStatusConfig(status, failureReason) {
       failureReasonDisplay: failureReason || "Authorization Failed",
       totalLabel: "Total Debited",
     },
+    reversed: {
+      headerLabel: "Transaction Reversed",
+      heading: "Your Transfer Has Been Reversed",
+      bodyLine:
+        "We're writing to inform you that your recent transfer has been <strong>reversed</strong> and the full amount has been returned to your account. This reversal occurred due to our <strong>inability to complete the transfer fee</strong> on this transaction. A summary of the transaction is provided below for your records.",
+      color: "#4a4a9c",
+      gradientFrom: "#7b7bd4",
+      accent: "#dcdcf7",
+      dateLabel: "Date Reversed",
+      amountLabel: "Amount Reversed",
+      showFee: true,
+      feeNote: "Refunded — included in this reversal",
+      showFailureReason: false,
+      totalLabel: "Total Reversed",
+    },
   };
 
   // Fallback: unknown/unexpected status still renders safely as "pending" styling,
@@ -240,7 +255,10 @@ const sendTransferConfirmationEmail = async ({
                         </tr>
                         <tr>
                             <td style="padding: 13px 20px; color: #6b7280; font-size: 13px; ${cfg.showFailureReason ? "border-bottom: 1px solid #eef1f5;" : ""}">Transfer Fee</td>
-                            <td style="padding: 13px 20px; text-align: right; color: #1f2937; font-size: 13px; ${cfg.showFailureReason ? "border-bottom: 1px solid #eef1f5;" : ""}">$${displayFee}${cfg.showFee ? "" : ' <span style="color:#9ca3af;">(not charged)</span>'}</td>
+                            <td style="padding: 13px 20px; text-align: right; color: #1f2937; font-size: 13px; ${cfg.showFailureReason ? "border-bottom: 1px solid #eef1f5;" : ""}">
+                                $${displayFee}${cfg.showFee ? "" : ' <span style="color:#9ca3af;">(not charged)</span>'}
+                                ${cfg.feeNote ? `<br/><span style="color:#9ca3af; font-size: 11px; font-style: italic;">${cfg.feeNote}</span>` : ""}
+                            </td>
                         </tr>
                         ${
                           cfg.showFailureReason
